@@ -118,6 +118,7 @@ router.post("/showReasonById", accountPayable.showReasonById);
 router.post("/accountRecivable", accountRecivable.addRecivable);
 router.get("/showaccountRecivable", accountRecivable.showRecivable);
 router.post("/completeSalesOrder", accountPayable.makeCompelte);
+router.post("/completeRecibableSalesOrder", accountRecivable.makeCompelte);
 router.get("/shoesalesOrderProd", accountRecivable.showSalesOrder)
 router.post("/shoesalesOrderProdById", accountRecivable.showSalesOrderById)
 
@@ -157,7 +158,11 @@ const dashboard = require("../controllers/dashboard/profite");
 router.get("/getProfit", dashboard.showProfit);
 router.get("/getuncollectedMoney", dashboard.getuncollected)
 router.get("/salesTotalYearly", dashboard.salesYearly)
-router.post("/selectproductionCost", dashboard.selectProductionCost)
+router.post("/selectproductionCost", dashboard.selectProductionCost);
+router.get("/donutgraph", dashboard.groupsalesProduct);
+router.get("/salesOnlyUncollected", dashboard.Uncollected)
+router.get("/getprofitDetail", dashboard.getProfitDetail);
+router.get("/lastFiveSalesOrders", dashboard.getLastFive)
 
 router.get("/", Home.home);
 

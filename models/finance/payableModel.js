@@ -24,7 +24,7 @@ module.exports = class payableModel {
   static async updateComplete(ID) {
     return await db
       .execute(
-        "UPDATE account_recevable SET recevable_status = 'COMPLETED' WHERE id = '" +
+        "UPDATE account_recevable SET recevable_status = 'Cash' WHERE id = '" +
           ID +
           "'"
       )

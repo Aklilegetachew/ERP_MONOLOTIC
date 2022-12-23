@@ -11,16 +11,11 @@ exports.showAllPayable = (req, res, next) => {
   });
 };
 exports.makeCompelte = async (req, res, next) => {
-  const result = await payableModel.makeComplete(req.body.salesID);
-  if (result) {
-    const results = await payableModel.updateComplete(req.body.ID);
-    if (results[0]) {
-      res.status(200).json(results[1]);
-    } else {
-      res.status(404).json(results[1]);
-    }
+  const results = await payableModel.updateComplete(req.body.ID);
+  if (results[0]) {
+    res.status(200).json(results[1]);
   } else {
-    res.status(404).json({ message: "Sales Status Error" });
+    res.status(404).json(results[1]);
   }
 };
 exports.showReasonById = async (req, res, next) => {

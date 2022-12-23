@@ -1,6 +1,38 @@
 const db = require("../../util/db");
 
 module.exports = class ProfiteModule {
+  static showlastFiveRecords() {
+    return db
+      .execute(
+        "SELECT * FROM ( SELECT * FROM sales_order_prod ORDER BY id DESC LIMIT 5) AS sub ORDER BY id ASC"
+      )
+      .then((respo) => {
+        return [true, respo[0]];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+  static fetchProfitAll() {
+    return db
+      .execute("SELECT * FROM dashboard_profit")
+      .then((respo) => {
+        return [true, respo[0]];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+  static fetchUncollected() {
+    return db
+      .execute("SELECT * FROM sales_order_prod WHERE status != 'Cash'")
+      .then((respo) => {
+        return [true, respo[0]];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
   static fetchProfit() {
     return db
       .execute("SELECT * FROM dashboard_profit")
@@ -12,15 +44,33 @@ module.exports = class ProfiteModule {
       });
   }
 
-  static async fetchProductionCost(salesID) {
-    
+  static async fetchproductsold(keyWord) {
     return await db
       .execute(
-         " SELECT * FROM dashboard_profit_detail t1 JOIN dashboard_profit t2 ON t1.salesId = '"+salesID+"' AND t2.salesID = '"+salesID+ "'"
-
+        "SELECT SUM(total_product) AS 'Weekly_Total' FROM sales_order_prod WHERE WEEK(sales_date) = WEEK(CURDATE()) AND product_orderd LIKE '" +
+          keyWord +
+          "' "
       )
       .then((respo) => {
-        
+        console.log(respo[0]);
+        return [true, respo[0][0].Weekly_Total];
+      })
+      .catch((err) => {
+        console.log(err);
+        return [false, err];
+      });
+  }
+
+  static async fetchProductionCost(salesID) {
+    return await db
+      .execute(
+        " SELECT * FROM dashboard_profit_detail t1 JOIN dashboard_profit t2 ON t1.salesId = '" +
+          salesID +
+          "' AND t2.salesID = '" +
+          salesID +
+          "'"
+      )
+      .then((respo) => {
         return [true, respo[0]];
       })
       .catch((err) => {

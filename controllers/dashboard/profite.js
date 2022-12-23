@@ -10,6 +10,65 @@ exports.showProfit = (req, res, next) => {
   });
 };
 
+exports.getLastFive = (req, res, next)=>{
+  profit.showlastFiveRecords().then((respo) => {
+    if (respo[0]) {
+      res.status(200).json(respo[1]);
+    } else {
+      res.status(400).json(respo[1]);
+    }
+  });
+}
+
+exports.Uncollected = (req, res, next) => {
+  profit.fetchUncollected().then((respo) => {
+    if (respo[0]) {
+      res.status(200).json(respo[1]);
+    } else {
+      res.status(400).json(respo[1]);
+    }
+  });
+};
+
+exports.getProfitDetail = (req, res, next) => {
+  profit.fetchProfitAll().then((respo) => {
+    if (respo[0]) {
+      res.status(200).json(respo[1]);
+    } else {
+      res.status(400).json(respo[1]);
+    }
+  });
+};
+
+exports.groupsalesProduct = async (req, res, next) => {
+  const lables = [
+    "PVC",
+    "PPR",
+    "HDPE",
+    "UPVC fittings",
+    "PPR Fitting",
+    "Condutes",
+  ];
+  var value = [];
+  for (let keylable of lables) {
+    await profit.fetchproductsold(keylable).then((respo) => {
+      if (respo[0]) {
+        if (respo[1] == null) {
+          value.push(0);
+        } else {
+          value.push(respo[1]);
+        }
+        // res.status(200).json(respo[1]);
+      } else {
+        console.log("here");
+        res.status(400).json(respo[1]);
+      }
+    });
+  }
+  console.log("va", value);
+  res.status(200).json(value);
+};
+
 exports.selectProductionCost = (req, res, next) => {
   profit.fetchProductionCost(req.body.salesID).then((respo) => {
     console.log(respo);

@@ -10,6 +10,18 @@ module.exports = class accountRecivable {
     return dateString + randomness;
   }
 
+  static async updateComplete(ID) {
+    return await db
+      .execute(
+        "UPDATE sales_order_prod SET status = 'Cash' WHERE id = '" + ID + "'"
+      )
+      .then((respo) => {
+        return [true, "COMPLETED"];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
   static async showsalesProdOrder() {
     return await db
       .execute("SELECT * FROM sales_order_prod")

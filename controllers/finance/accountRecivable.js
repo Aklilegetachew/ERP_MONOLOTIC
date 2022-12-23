@@ -21,6 +21,17 @@ exports.addRecivable = async (req, res, next) => {
     });
 };
 
+exports.makeCompelte = async (req, res, next) => {
+ 
+    const results = await accountRecivable.updateComplete(req.body.ID);
+    if (results[0]) {
+      res.status(200).json(results[1]);
+    } else {
+      res.status(404).json(results[1]);
+    }
+ 
+};
+
 exports.showSalesOrder = async (req, res, next) => {
   const result = await accountRecivable.showsalesProdOrder();
 
