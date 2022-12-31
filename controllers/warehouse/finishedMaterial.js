@@ -7,6 +7,13 @@ exports.getFinished = (req, res, next) => {
   });
 };
 
+exports.getFinishedByCat = (req, res, next) => {
+  finishedGood.getallFinishedCat(req.body.Cat, req.body.Spec).then((result) => {
+  console.log(result);
+  res.status(200).json(result);
+});
+};
+
 exports.addFinished = (req, res, next) => {
   console.log(req.body);
   finishedGood.addFinishedMat(req.body).then((result) =>{

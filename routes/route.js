@@ -21,6 +21,7 @@ router.post("/addnewAccessory", accessory.addAccessory);
 router.post("/updateAccessory", accessory.UpdateAccessory);
 
 router.get("/finishedMaterial", finishedMat.getFinished);
+router.post("/finishedMaterialbyCat", finishedMat.getFinishedByCat);
 router.post("/addnewFinMaterials", finishedMat.addFinished);
 router.post("/updateFinishedMaterials", finishedMat.UpdateFinished);
 

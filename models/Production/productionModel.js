@@ -12,6 +12,21 @@ module.exports = class productionModel {
     return dateString + randomness;
   }
 
+  static GMStatus(data) {
+    return db
+      .execute(
+        "UPDATE productionordergm SET final_status = 'PM Approved' WHERE id = '" +
+          data.GMID +
+          "'"
+      )
+      .then((respo) => {
+        return true;
+      })
+      .catch((err) => {
+        return err;
+      });
+  }
+
   static async fetchSalesInfo(id) {
     return db
       .execute("SELECT * FROM sales_order_prod WHERE salesId = '" + id + "'")
@@ -259,6 +274,7 @@ module.exports = class productionModel {
               mat_reqpersonid: mat_reqperson,
               req_materialtype: "RAW",
               ProductionId: prodId,
+              FsNumber: selectedOrder[0].Fs_number
             };
 
             await storeRequestion
@@ -385,29 +401,34 @@ module.exports = class productionModel {
   // }
 
   static async addproductionOrder(newData) {
+    const UniqID = this.uniqueId();
     db.execute(
-      "INSERT INTO custome_batch(raw_mat_needed, expected_fin_qty, expected_waste_quan, custom_batch_id) VALUES (?, ?, ?, ?)",
+      "INSERT INTO custome_batch(raw_mat_needed, expected_fin_qty, custom_batch_id) VALUES (?, ?, ?)",
       [
         newData.raw_needed,
-        newData.expected_fin_qty,
-        newData.expected_waste_quan,
-        newData.salesID,
+        newData.expected_fin_qty || "",
+    
+        newData.salesID == "" ? UniqID : salesID,
       ]
     ).then((resu) => {
       console.log("Making custom Batch");
     });
     return db
       .execute(
-        "INSERT INTO production_order(fin_product, fin_spec, fin_quan, start_dateTime, mesuring_unit, final_color, status, custom_batch_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO production_order(fin_product, fin_desc, fin_spec, fin_quan, finished_materialcode, finished_diameter, start_dateTime, mesuring_unit, final_color, status, custom_batch_id, Fs_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           newData.fin_product,
-          newData.fin_spec,
+          newData.fin_desc ||"",
+          newData.fin_spec || "",
           newData.fin_quan,
+          newData.finished_materialcode,
+          newData.finished_diameter,
           newData.start_dateTime,
           newData.final_measureunit,
           newData.final_color,
           newData.status,
-          newData.salesID,
+          newData.salesID == "" ? UniqID : salesID,
+          newData.FS_NUMBER,
         ]
       )
       .then((resp) => {
@@ -421,15 +442,16 @@ module.exports = class productionModel {
   static addproductionOrderGM(newData) {
     return db
       .execute(
-        "INSERT INTO productionordergm(final_product, final_spec, final_desc, final_quant, final_measureunit, order_reciver, final_color, final_status, produced_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO productionordergm(final_product, final_spec, final_desc, final_quant, final_measureunit, order_reciver, final_color, finished_materialcode, final_status, produced_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           newData.final_product,
-          newData.final_spec,
+          newData.finished_diameter,
           newData.final_desc,
           newData.final_quant,
           newData.final_measureunit,
           newData.order_reciver,
           newData.final_color,
+          newData.finished_materialcode,
           "PENDING",
           newData.produced_id || 0,
         ]

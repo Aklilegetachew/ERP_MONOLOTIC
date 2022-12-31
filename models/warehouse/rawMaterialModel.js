@@ -13,7 +13,6 @@ module.exports = class rawMaterial {
   }
 
   static addRawMaterials(newMaterialForm) {
-
     return db
       .execute(
         "INSERT INTO raw_materials(raw_name, raw_quantity, raw_description, raw_materialcode, raw_spec, raw_materialunit, raw_value, raw_referncenum, raw_date, raw_remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -56,8 +55,8 @@ module.exports = class rawMaterial {
       .execute(
         "SELECT * FROM raw_materials WHERE raw_name='" +
           newName +
-          "' AND raw_description='" +
-          mat.raw_description +
+          "' AND raw_materialcode='" +
+          mat.raw_materialcode +
           "'"
       )
       .then((result) => {
@@ -153,9 +152,9 @@ module.exports = class rawMaterial {
     // }
 
     var updateQuan;
-    if (oldMat[0].raw_quantity >= parseInt(newMat.raw_quantity)) {
+    if (oldMat[0].raw_quantity >= parseFloat(newMat.raw_quantity)) {
       updateQuan =
-        parseInt(oldMat[0].raw_quantity) - parseInt(newMat.raw_quantity);
+        parseFloat(oldMat[0].raw_quantity) - parseFloat(newMat.raw_quantity);
 
       return db
         .execute(
@@ -169,7 +168,7 @@ module.exports = class rawMaterial {
           const today = new Date();
           return db
             .execute(
-              "INSERT INTO summery(material_id, material_type, summery_date, stockat_hand, stock_recieved, stock_issued, department_issued, stockat_end) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+              "INSERT INTO summery(material_id, material_type, summery_date, stockat_hand, stock_recieved, stock_issued, department_issued, stockat_end, fs_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
               [
                 oldMat[0].id,
                 "RAW",
@@ -179,6 +178,7 @@ module.exports = class rawMaterial {
                 newMat.raw_quantity,
                 newMat.raw_requestdept,
                 updateQuan,
+                newMat.FsNumber
               ]
             )
             .then((res) => {

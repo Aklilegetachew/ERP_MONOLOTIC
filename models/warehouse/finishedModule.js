@@ -12,6 +12,25 @@ module.exports = class accessory {
       });
   }
 
+  static getallFinishedCat(catagory, Spec) {
+    console.log("cat", catagory);
+    console.log("spec", Spec);
+    return db
+      .execute(
+        "SELECT * FROM finished_goods WHERE finished_name = '" +
+          catagory +
+          "' AND finished_description = '" +
+          Spec +
+          "'"
+      )
+      .then((result) => {
+        return result[0];
+      })
+      .catch((err) => {
+        return console.log(err);
+      });
+  }
+
   static addFinishedMat(newMaterialForm) {
     const totalValue =
       parseFloat(newMaterialForm.finished_value) *
@@ -134,12 +153,11 @@ module.exports = class accessory {
     if (oldMat[0].finished_quantity >= parseInt(newMat.fin_quantity)) {
       updateQuan =
         parseInt(oldMat[0].finished_quantity) - parseInt(newMat.fin_quantity);
-      
+
       return await db
         .execute(
           "UPDATE finished_goods SET	finished_quantity ='" +
             updateQuan +
-
             "' WHERE id ='" +
             oldMat[0].id +
             "'"

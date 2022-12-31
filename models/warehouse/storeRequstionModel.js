@@ -23,20 +23,23 @@ module.exports = class storeRequestion {
     );
     // console.log("salesInfo", salesInfo);
     const GID = await accountRecivable.addtoReasonrequ(newData);
-// console.log("gid", GID)
-    const respo = await accountRecivable
-      .addToRecivable(salesInfo[0], GID, newData.raw_salesId)
-      console.log("ttttttttttttt",respo)
-      return respo
-      // .then((respo) => {
-      //   console.log("oooooo",respo)
-      //   if (respo[0]) {
-      //     return { message: "Financed", response: respo[1] };
-      //   } else {
-      //     console.log(respo[1]);
-      //     return { message: "error on finance recivable", response: respo[1] };
-      //   }
-      // });
+    // console.log("gid", GID)
+    const respo = await accountRecivable.addToRecivable(
+      salesInfo[0],
+      GID,
+      newData.raw_salesId
+    );
+    console.log("ttttttttttttt", respo);
+    return respo;
+    // .then((respo) => {
+    //   console.log("oooooo",respo)
+    //   if (respo[0]) {
+    //     return { message: "Financed", response: respo[1] };
+    //   } else {
+    //     console.log(respo[1]);
+    //     return { message: "error on finance recivable", response: respo[1] };
+    //   }
+    // });
 
     // await finAxios
     //   .post("/accountRecivable", {
@@ -141,12 +144,12 @@ module.exports = class storeRequestion {
   static addstoreRequestion(materialRequested) {
     return db
       .execute(
-        "INSERT INTO material_request(mat_requestname, mat_requestdept, mat_reqpersonid, mat_description, mat_quantity, req_materialtype, mat_status, salesID, prodID, mat_unit, mat_spec) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO material_request(mat_requestname, mat_requestdept, mat_reqpersonid, mat_description, mat_quantity, req_materialtype, mat_status, salesID, prodID, mat_unit, mat_spec, FsNumber) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           materialRequested.mat_requestname,
           materialRequested.mat_requestdept,
           materialRequested.mat_reqpersonid || "234",
-          materialRequested.mat_description,
+          materialRequested.mat_materialcode,
           materialRequested.mat_quantity,
           materialRequested.req_materialtype,
           "PENDING",
@@ -154,6 +157,7 @@ module.exports = class storeRequestion {
           materialRequested.ProductionId || " ",
           materialRequested.mat_unit || "",
           materialRequested.mat_spec || "",
+          materialRequested.FsNumber || "",
         ]
       )
       .then((result) => {

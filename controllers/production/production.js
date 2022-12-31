@@ -7,7 +7,9 @@ exports.addNewproductionOrder = (req, res, next) => {
   console.log(req.body);
   productionModel.addproductionOrder(req.body).then((result) => {
     if (result[0]) {
-      res.status(200).json(result[1]);
+      productionModel.GMStatus(req.body).then((resa)=>{
+        res.status(200).json(result[1]);
+      })
     } else {
       res.status(400).json(result[1]);
     }
@@ -68,8 +70,8 @@ exports.productFinshed = async (req, res, next) => {
     if (result[0] == false) {
       res.status(403).json({ message: "error requesting" });
     } else {
-      // const respo = await productionModel.sendtoWareHouse(req.body);
-      // const resu = await productionModel.makeFinished(req.body);
+      const respo = await productionModel.sendtoWareHouse(req.body);
+      const resu = await productionModel.makeFinished(req.body);
       const rawUsed = await productionModel.fetchRawMatused(req.body.salesID);
       const massperFin = await productionModel.fetchFinMass(
         req.body.new_name,
