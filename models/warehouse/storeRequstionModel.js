@@ -87,6 +87,8 @@ module.exports = class storeRequestion {
                   raw_spec: result[0][0].mat_spec,
                   raw_prodId: result[0][0].prodID,
                   raw_salesId: result[0][0].salesID,
+                  raw_materialcode: result[0][0].mat_materialcode,
+                  FsNumber: result[0][0].FsNumber,
                 };
               } else if (result[0][0].req_materialtype == "FIN") {
                 newMatData = {
@@ -144,12 +146,12 @@ module.exports = class storeRequestion {
   static addstoreRequestion(materialRequested) {
     return db
       .execute(
-        "INSERT INTO material_request(mat_requestname, mat_requestdept, mat_reqpersonid, mat_description, mat_quantity, req_materialtype, mat_status, salesID, prodID, mat_unit, mat_spec, FsNumber) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO material_request(mat_requestname, mat_requestdept, mat_reqpersonid, mat_description, mat_quantity, req_materialtype, mat_status, salesID, prodID, mat_unit, mat_spec, FsNumber, mat_materialcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           materialRequested.mat_requestname,
           materialRequested.mat_requestdept,
           materialRequested.mat_reqpersonid || "234",
-          materialRequested.mat_materialcode,
+          materialRequested.mat_description || "",
           materialRequested.mat_quantity,
           materialRequested.req_materialtype,
           "PENDING",
@@ -158,6 +160,7 @@ module.exports = class storeRequestion {
           materialRequested.mat_unit || "",
           materialRequested.mat_spec || "",
           materialRequested.FsNumber || "",
+          materialRequested.mat_materialcode || "",
         ]
       )
       .then((result) => {

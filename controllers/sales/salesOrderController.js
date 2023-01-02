@@ -1,6 +1,7 @@
 const salesModle = require("../../models/sales/salesOrder");
 
 module.exports.requestProductionOrder = async (req, res, then) => {
+  console.log("form", req.body);
   await salesModle.addProductionSales(req.body).then((respo) => {
     if (respo[0]) {
       res.status(200).json(respo[1]);

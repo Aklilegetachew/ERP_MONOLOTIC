@@ -32,27 +32,30 @@ module.exports = class salesOrder {
         ]
       )
       .then((respo) => {
-        return db
-          .execute(
-            "INSERT INTO productionordergm(final_product, final_spec, final_desc, final_quant, final_measureunit, order_reciver, final_color, final_status, salesID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            [
-              data.final_product,
-              data.final_spec,
-              data.final_desc,
-              data.final_quant,
-              data.final_measureunit,
-              data.order_reciver || "FROM sales",
-              data.final_color,
-              "PENDING",
-              data.salesID || 0,
-            ]
-          )
-          .then((resp) => {
-            return [true, "Production order added"];
-          })
-          .catch((err) => {
-            return [false, err];
-          });
+        return [true, "Production order added"];
+
+        // return db
+        //   .execute(
+        //     "INSERT INTO productionordergm(final_product, final_spec, final_desc, final_quant, final_measureunit, order_reciver, final_color, final_status, salesID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        //     [
+        //       data.final_product,
+        //       data.final_spec,
+        //       data.final_desc,
+        //       data.final_quant,
+        //       data.final_measureunit,
+        //       data.order_reciver || "FROM sales",
+        //       data.final_color,
+        //       "PENDING",
+        //       data.salesID || 0,
+        //     ]
+        //   )
+        //   .then((resp) => {
+        //     return [true, "Production order added"];
+        //   })
+        //
+      })
+      .catch((err) => {
+        return [false, err];
       });
   }
 

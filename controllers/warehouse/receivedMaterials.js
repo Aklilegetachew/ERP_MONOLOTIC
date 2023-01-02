@@ -62,6 +62,7 @@ exports.acceptPurchased = async (req, res, next) => {
           finMat
             .checkExisFinM(result.fin_name, result.material_type, result)
             .then((found) => {
+              console.log("respo",found)
               if (found[0]) {
                 finMat.addQty(found[1], result);
               } else {

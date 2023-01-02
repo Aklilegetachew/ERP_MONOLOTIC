@@ -53,9 +53,7 @@ module.exports = class rawMaterial {
     console.log(mat);
     return db
       .execute(
-        "SELECT * FROM raw_materials WHERE raw_name='" +
-          newName +
-          "' AND raw_materialcode='" +
+        "SELECT * FROM raw_materials WHERE raw_materialcode='" +
           mat.raw_materialcode +
           "'"
       )
@@ -105,51 +103,6 @@ module.exports = class rawMaterial {
   }
 
   static async subQty(oldMat, newMat) {
-    // var updateQuan;
-    // if (oldMat[0].raw_quantity >= parseFloat(newMat.raw_quantity)) {
-    //   updateQuan =
-    //   parseFloat(oldMat[0].raw_quantity) - parseFloat(newMat.raw_quantity);
-    //   var newValue =
-    //     parseFloat(oldMat[0].raw_value) -
-    //     parseFloat(newMat.raw_quantity) * parseFloat(oldMat[0].raw_value);
-    //   console.log("new quantity", updateQuan);
-    //   console.log("new values", oldMat[0].raw_name);
-
-    //   return await  db
-    //     .execute(
-    //       "UPDATE raw_materials SET raw_quantity = '200' AND raw_value ='" +
-    //         300 +
-    //         "' WHERE id ='" +
-    //         oldMat[0].id +
-    //         "'"
-    //     )
-    //     .then((result) => {
-    //       const today = new Date()
-
-    //       return db
-    //         .execute(
-    //           "INSERT INTO summery(material_id, material_type, summery_date, stockat_hand, stock_recieved, stock_issued, department_issued, stockat_end) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-    //           [
-    //             oldMat[0].id,
-    //             "RAW",
-    //             today,
-    //             oldMat[0].raw_quantity,
-    //             "",
-    //             newMat.raw_quantity,
-    //             newMat.raw_requestdept,
-    //             updateQuan,
-    //           ]
-    //         )
-    //         .then((res) => {
-    //           return "summery Updated";
-    //         });
-    //     })
-    //     .catch((e) => {
-    //       console.log(e);
-    //     });
-    // } else {
-    //   return "Low in stock";
-    // }
 
     var updateQuan;
     if (oldMat[0].raw_quantity >= parseFloat(newMat.raw_quantity)) {
@@ -178,7 +131,7 @@ module.exports = class rawMaterial {
                 newMat.raw_quantity,
                 newMat.raw_requestdept,
                 updateQuan,
-                newMat.FsNumber
+                newMat.FsNumber,
               ]
             )
             .then((res) => {

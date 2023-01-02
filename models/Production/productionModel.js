@@ -3,6 +3,7 @@ const axios = require("axios");
 const wareAxios = require("../../midelware/warehouseaxios");
 const storeRequestion = require("../warehouse/storeRequstionModel");
 const receivedModule = require("..//warehouse/recievedMatModules");
+const { parse } = require("dotenv");
 
 module.exports = class productionModel {
   composerArray = new Array();
@@ -138,20 +139,29 @@ module.exports = class productionModel {
       });
   }
 
-  static makeFinished(data) {
-    return db
-      .execute(
-        "UPDATE production_order SET status = 'FINISHED' WHERE id ='" +
-          data.prodID +
-          "'"
-      )
-      .then((respo) => {
-        return [true, "FINISHED"];
-      })
-      .catch((err) => {
-        return [false, err];
-      });
+
+
+  static async makeFinished(data) {
+    const leftamaount = parseFloat(data.oldQuantity) - parseFloat(data.new_quantity);
+  
+    let status;
+    if (leftamaount === 0) {
+      status = 'FINISHED';
+    } else {
+      status = 'STARTED';
+    }
+  
+    try {
+      await db.execute(
+        'UPDATE production_order SET fin_quan = ?, status = ? WHERE id = ?',
+        [leftamaount, status, data.prodID]
+      );
+      return [true, status];
+    } catch (error) {
+      return [false, error];
+    }
   }
+  
 
   static showFinished() {
     return db
@@ -180,20 +190,21 @@ module.exports = class productionModel {
 
   static completeOrder(data) {
     console.log(data);
+
     return db
       .execute(
         "INSERT INTO produced(productionID, finished_name, finished_spec, finished_qty, personID, finished_description, finished_materialunit, finished_remark, finished_materialcode, mat_color) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           data.prodID,
           data.new_name,
-          data.new_spec,
+          data.new_spec || "",
           data.new_quantity,
           data.personID,
-          data.new_description,
-          data.new_materialunit,
-          data.new_remark,
-          data.new_materialcode,
-          data.new_color,
+          data.new_description || data.new_diameter,
+          data.new_materialunit || "",
+          data.new_remark || "",
+          data.new_materialcode || "",
+          data.new_color || "",
         ]
       )
       .then((result) => {
@@ -274,7 +285,7 @@ module.exports = class productionModel {
               mat_reqpersonid: mat_reqperson,
               req_materialtype: "RAW",
               ProductionId: prodId,
-              FsNumber: selectedOrder[0].Fs_number
+              FsNumber: selectedOrder[0].Fs_number,
             };
 
             await storeRequestion
@@ -293,6 +304,127 @@ module.exports = class productionModel {
         });
     } else {
       console.log("else");
+    }
+  }
+
+  static makeBatchCost(selectedOrder) {
+    var resultArray = [];
+
+    return db
+      .execute(
+        "SELECT * FROM custome_batch WHERE custom_batch_id = '" +
+          selectedOrder[0].custom_batch_id +
+          "'"
+      )
+      .then((result) => {
+        const rawmaterials = JSON.parse(result[0][0].raw_mat_needed);
+
+        return rawmaterials;
+      })
+      .catch((err) => {
+        console.log(err);
+        return false;
+      });
+  }
+
+  // static calculateCost(materialsList, productionId, personId) {
+  //   var totalMass = 0.0;
+  //   var totalValue = 0.0;
+  //   var totalperone = 0.0;
+  //   materialsList.forEach(async (element) => {
+  //     return db
+  //       .execute(
+  //         "SELECT * FROM raw_materials WHERE raw_materialcode ='" +
+  //           element.mat_materialcode +
+  //           "'"
+  //       )
+  //       .then((res) => {
+  //         const materialValue = parseFloat(res[0][0].raw_value);
+  //         const eachValue = materialValue * parseFloat(element.mat_quantity);
+  //         totalMass += parseFloat(element.mat_quantity);
+  //         totalValue += eachValue;
+  //         console.log(totalMass);
+  //         console.log(totalValue)
+  //         db.execute(
+  //           "INSERT INTO production_cost(production_id, fs_num, raw_name,	raw_materialcode, each_quantity, each_value, each_total) VALUES(?, ?, ?, ?, ?, ?, ?)",
+  //           [
+  //             productionId,
+  //             "",
+  //             element.mat_requestname,
+  //             element.mat_materialcode,
+  //             element.mat_quantity,
+  //             materialValue,
+  //             eachValue,
+  //           ]
+  //         ).then((respo) => {
+  //           return;
+  //         });
+  //       });
+  //   });
+  //   totalperone = totalValue / totalMass;
+  //   return db
+  //     .execute(
+  //       "UPDATE production_cost SET totalmass = '" +
+  //         totalMass +
+  //         "', valueper1kg = '" +
+  //         totalperone +
+  //         "', totalValue = '" +
+  //         totalValue +
+  //         "' WHERE production_id = '" +
+  //         productionId +
+  //         "'"
+  //     )
+  //     .then((res) => {
+  //       console.log("YES ITS DONE");
+  //       return true;
+  //     })
+  //     .catch((err) => {
+  //       console.log("YES ITS NOT", err);
+  //       return err;
+  //     });
+  // }
+
+  static async calculateCost(materialsList, productionId, personId) {
+    let totalMass = 0.0;
+    let totalValue = 0.0;
+    let totalperone = 0.0;
+
+    for (const element of materialsList) {
+      try {
+        const [[material]] = await db.execute(
+          "SELECT * FROM raw_materials WHERE raw_materialcode = ?",
+          [element.mat_materialcode]
+        );
+        const materialValue = parseFloat(material.raw_value);
+        const eachValue = materialValue * parseFloat(element.mat_quantity);
+        totalMass += parseFloat(element.mat_quantity);
+        totalValue += eachValue;
+
+        await db.execute(
+          "INSERT INTO production_cost(production_id, fs_num, raw_name, raw_materialcode, each_quantity, each_value, each_total) VALUES(?, ?, ?, ?, ?, ?, ?)",
+          [
+            productionId,
+            personId,
+            element.mat_requestname,
+            element.mat_materialcode,
+            element.mat_quantity,
+            materialValue,
+            eachValue,
+          ]
+        );
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    totalperone = totalValue / totalMass;
+    try {
+      await db.execute(
+        "UPDATE production_cost SET totalmass = ?, valueper1kg = ?, totalValue = ? WHERE production_id = ?",
+        [totalMass, totalperone, totalValue, productionId]
+      );
+    } catch (error) {
+      console.error(error);
     }
   }
 
@@ -407,7 +539,7 @@ module.exports = class productionModel {
       [
         newData.raw_needed,
         newData.expected_fin_qty || "",
-    
+
         newData.salesID == "" ? UniqID : salesID,
       ]
     ).then((resu) => {
@@ -418,7 +550,7 @@ module.exports = class productionModel {
         "INSERT INTO production_order(fin_product, fin_desc, fin_spec, fin_quan, finished_materialcode, finished_diameter, start_dateTime, mesuring_unit, final_color, status, custom_batch_id, Fs_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           newData.fin_product,
-          newData.fin_desc ||"",
+          newData.fin_desc || "",
           newData.fin_spec || "",
           newData.fin_quan,
           newData.finished_materialcode,
@@ -442,7 +574,7 @@ module.exports = class productionModel {
   static addproductionOrderGM(newData) {
     return db
       .execute(
-        "INSERT INTO productionordergm(final_product, final_spec, final_desc, final_quant, final_measureunit, order_reciver, final_color, finished_materialcode, final_status, produced_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO productionordergm(final_product, finished_diameter, final_desc, final_quant, final_measureunit, order_reciver, final_color, finished_materialcode, final_status, produced_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           newData.final_product,
           newData.finished_diameter,
