@@ -7,14 +7,57 @@ exports.addNewproductionOrder = (req, res, next) => {
   console.log(req.body);
   productionModel.addproductionOrder(req.body).then((result) => {
     if (result[0]) {
-      productionModel.GMStatus(req.body).then((resa)=>{
+      productionModel.GMStatus(req.body).then((resa) => {
         res.status(200).json(result[1]);
-      })
+      });
     } else {
       res.status(400).json(result[1]);
     }
   });
 };
+
+exports.rawMaterialRequest = (req, res, next) => {
+  const materials = req.body[0];
+  const batchID = req.body[1];
+  const FsNumber = req.body[2];
+  var status = false;
+  console.log(materials);
+  res.status(200).json("Good");
+  materials.forEach((element) => {
+    productionModel
+      .addrawMaterialRequest(element, FsNumber, batchID)
+      .then((result) => {
+        status = result[0];
+      });
+  });
+
+  if (status) {
+    res.status(200).json(result[1]);
+  } else {
+    res.status(400).json(result[1]);
+  }
+};
+
+exports.showrawMaterialRequest = (req, res, next) => {
+  productionModel.showrawMaterialRequest().then((result) => {
+    if (result[0]) {
+      res.status(200).json(result[1]);
+    } else {
+      res.status(400).json(result[1]);
+    }
+  });
+};
+
+exports.resporawMaterialRequest = (req, res, next) =>{
+  const status = req.status
+  const id = request.id
+  
+  if(status= "ACCEPT"){
+
+  }else{
+    
+  }
+}
 
 exports.showProductionGM = (req, res, next) => {
   productionModel.showallProductionGM().then((result) => {
@@ -72,7 +115,6 @@ exports.productFinshed = async (req, res, next) => {
     } else {
       const respo = await productionModel.sendtoWareHouse(req.body);
 
-
       const resu = await productionModel.makeFinished(req.body);
       const rawUsed = await productionModel.fetchRawMatused(req.body.salesID);
       // const massperFin = await productionModel.fetchFinMass(
@@ -104,14 +146,13 @@ exports.productFinshed = async (req, res, next) => {
       //   const salesInfo = await productionModel.fetchSalesInfo(
       //     req.body.salesID
       //   );
-        
+
       //   costperOneGram =
       //     (totalcostofRawMaterial) / rawmaterialTotal;
 
       //   //// add vat if needed
       //   otherCost = (costperOneGram * parseFloat(massperFin)) * 0.15;
       //   costofoneFin = (costperOneGram * parseFloat(massperFin))+ otherCost;
-        
 
       //   costofTotalOrder = parseFloat(salesInfo.total_product) * costofoneFin;
       //   salesProfit = parseFloat(salesInfo.totalCash) - costofTotalOrder;
@@ -173,8 +214,7 @@ exports.startProduction = async (req, res, next) => {
       );
 
       const makeBatchCosts = await productionModel.makeBatchCost(
-        selectedResult[1],
-      
+        selectedResult[1]
       );
 
       const costCalculated = await productionModel.calculateCost(

@@ -10,7 +10,18 @@ exports.showProfit = (req, res, next) => {
   });
 };
 
-exports.getLastFive = (req, res, next)=>{
+exports.selectDiameter = (req, res, next) => {
+  console.log("OD", req.body);
+  profit.fetchDiameters(req.body.Cat).then((respo) => {
+    if (respo[0]) {
+      res.status(200).json(respo[1]);
+    } else {
+      res.status(400).json(respo[1]);
+    }
+  });
+};
+
+exports.getLastFive = (req, res, next) => {
   profit.showlastFiveRecords().then((respo) => {
     if (respo[0]) {
       res.status(200).json(respo[1]);
@@ -18,7 +29,7 @@ exports.getLastFive = (req, res, next)=>{
       res.status(400).json(respo[1]);
     }
   });
-}
+};
 
 exports.Uncollected = (req, res, next) => {
   profit.fetchUncollected().then((respo) => {

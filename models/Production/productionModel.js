@@ -13,6 +13,43 @@ module.exports = class productionModel {
     return dateString + randomness;
   }
 
+  static addrawMaterialRequest(materials, fs_number, batch) {
+    console.log(fs_number);
+    console.log(materials.raw_materialcode);
+
+    return db
+      .execute(
+        "INSERT INTO rawmaterialrequest (batch_id, fsNumber, raw_name, raw_materialcode, quantity, material_unit, req_status, request_date)VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+          batch,
+          fs_number,
+          materials.new_name,
+          materials.new_materialcode,
+          materials.new_quantity,
+          materials.new_materialunit,
+          "NEW",
+          "date",
+        ]
+      )
+      .then((respo) => {
+        return [true, "New REQUEST ADDED"];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+
+  static showrawMaterialRequest() {
+    return db
+      .execute("SELECT * FROM rawmaterialrequest WHERE req_status = 'NEW'")
+      .then((respo) => {
+        return [true, respo[0]];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+
   static GMStatus(data) {
     return db
       .execute(
@@ -139,21 +176,20 @@ module.exports = class productionModel {
       });
   }
 
-
-
   static async makeFinished(data) {
-    const leftamaount = parseFloat(data.oldQuantity) - parseFloat(data.new_quantity);
-  
+    const leftamaount =
+      parseFloat(data.oldQuantity) - parseFloat(data.new_quantity);
+
     let status;
     if (leftamaount === 0) {
-      status = 'FINISHED';
+      status = "FINISHED";
     } else {
-      status = 'STARTED';
+      status = "STARTED";
     }
-  
+
     try {
       await db.execute(
-        'UPDATE production_order SET fin_quan = ?, status = ? WHERE id = ?',
+        "UPDATE production_order SET fin_quan = ?, status = ? WHERE id = ?",
         [leftamaount, status, data.prodID]
       );
       return [true, status];
@@ -161,7 +197,6 @@ module.exports = class productionModel {
       return [false, error];
     }
   }
-  
 
   static showFinished() {
     return db

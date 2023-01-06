@@ -15,18 +15,17 @@ module.exports = class rawMaterial {
   static addRawMaterials(newMaterialForm) {
     return db
       .execute(
-        "INSERT INTO raw_materials(raw_name, raw_quantity, raw_description, raw_materialcode, raw_spec, raw_materialunit, raw_value, raw_referncenum, raw_date, raw_remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO raw_materials(raw_name, raw_quantity, raw_description, raw_materialcode, raw_spec, raw_materialunit, raw_value, raw_referncenum, raw_remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           newMaterialForm.raw_name,
-          newMaterialForm.raw_quantity,
-          newMaterialForm.raw_description,
+          newMaterialForm.raw_quantity || "0",
+          newMaterialForm.raw_description || "-",
           newMaterialForm.raw_materialcode,
-          newMaterialForm.raw_spec,
-          newMaterialForm.raw_materialunit,
-          newMaterialForm.raw_value,
-          newMaterialForm.raw_referncenum,
-          newMaterialForm.raw_date,
-          newMaterialForm.raw_remark,
+          newMaterialForm.raw_spec || "-",
+          newMaterialForm.raw_materialunit || "-",
+          newMaterialForm.raw_value || "0",
+          newMaterialForm.raw_referncenum || "",
+          newMaterialForm.raw_remark || "-",
         ]
       )
       .then(() => {
@@ -103,7 +102,6 @@ module.exports = class rawMaterial {
   }
 
   static async subQty(oldMat, newMat) {
-
     var updateQuan;
     if (oldMat[0].raw_quantity >= parseFloat(newMat.raw_quantity)) {
       updateQuan =

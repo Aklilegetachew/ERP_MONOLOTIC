@@ -68,13 +68,14 @@ module.exports = class storeRequestion {
               if (result[0][0].req_materialtype == "ACCS") {
                 newMatData = {
                   accs_name: result[0][0].mat_requestname,
-                  accs_description: result[0][0].mat_description,
+                  accs_materialcode: result[0][0].mat_materialcode,
                   accs_requestdept: result[0][0].mat_requestdept,
                   accs_reqpersonid: result[0][0].mat_reqpersonid,
                   accs_quantity: result[0][0].mat_quantity,
                   materialtype: result[0][0].req_materialtype,
                   raw_prodId: result[0][0].prodID,
                   raw_salesId: result[0][0].salesID,
+                  FsNumber: result[0][0].FsNumber,
                 };
               } else if (result[0][0].req_materialtype == "RAW") {
                 newMatData = {
@@ -100,6 +101,9 @@ module.exports = class storeRequestion {
                   materialtype: result[0][0].req_materialtype,
                   raw_prodId: result[0][0].prodID,
                   raw_salesId: result[0][0].salesID,
+                  fin_color: result[0][0].finished_Color,
+                  fin_materialcode: result[0][0].mat_materialcode,
+                  fin_diameter: result[0][0].finished_diameter,
                 };
               }
 
@@ -168,6 +172,30 @@ module.exports = class storeRequestion {
       })
       .catch((err) => {
         console.log("yhuyuyuuy", err);
+        return false;
+      });
+  }
+
+  static addstoreRequestionAccs(materialRequested) {
+    return db
+      .execute(
+        "INSERT INTO material_request(mat_requestname, mat_requestdept, mat_reqpersonid, mat_quantity, req_materialtype, mat_status, mat_unit, FsNumber, mat_materialcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+          materialRequested.material_name,
+          "Production",
+          materialRequested.request_person || "",
+          materialRequested.materialQty,
+          "ACCS",
+          "PENDING",
+          materialRequested.measuring_unit || " ",
+          materialRequested.FS_number || " ",
+          materialRequested.material_code || "",
+        ]
+      )
+      .then((result) => {
+        return true;
+      })
+      .catch((err) => {
         return false;
       });
   }

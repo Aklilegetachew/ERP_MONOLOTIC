@@ -9,11 +9,16 @@ exports.getMaterials = (req, res, next) => {
 
 exports.addMaterials = (req, res, next) => {
   console.log(req.body);
-  rawMaterial.addRawMaterials(req.body).then((result) => {
-    console.log(result);
-    res.status(200).json(result);
-  });
-}; 
+  rawMaterial
+    .addRawMaterials(req.body)
+    .then((result) => {
+      console.log(result);
+      res.status(200).json(result);
+    })
+    .catch((err) => {
+      res.status(400).json(result);
+    });
+};
 
 exports.UpdateMaterials = (req, res, next) => {
   console.log(req.body);

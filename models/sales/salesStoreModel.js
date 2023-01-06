@@ -1,6 +1,85 @@
 const db = require("../../util/db");
 
 module.exports = class salesStore {
+  static async getsalesbyID(id) {
+    return await db
+      .execute("SELECT * FROM sales_order WHERE id=" + id + "")
+      .then((respo) => {
+        return respo[0];
+      })
+      .catch((err) => {
+        return false;
+      });
+  }
+
+  static async rawMaterialRequest(materialRequested) {
+    return await db
+      .execute(
+        "INSERT INTO material_request(mat_requestname, mat_requestdept, mat_reqpersonid, mat_quantity, req_materialtype, mat_status, salesID, FsNumber, mat_materialcode, finished_diameter, finished_Color, mat_description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+          materialRequested.final_product,
+          "SALES",
+          "SALES",
+          materialRequested.final_quant || "",
+          "FIN",
+          "PENDING",
+          materialRequested.salesID || " ",
+          materialRequested.salesID || " ",
+          materialRequested.final_materialCode || "",
+          materialRequested.final_diameter,
+          materialRequested.final_color,
+          materialRequested.final_diameter,
+        ]
+      )
+      .then((result) => {
+        return true;
+      })
+      .catch((err) => {
+        console.log("err", err);
+        return false;
+      });
+  }
+
+  static async postOrder(data) {
+    return await db
+      .execute(
+        "INSERT INTO sales_order_prod(customer_name, customer_address, customer_tin, product_orderd, product_color, product_desc, product_spec, total_product, mou, totalCash, status, advances, salesId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+          data.customer_name,
+          data.customer_address,
+          data.Tin_number,
+          data.final_product,
+          data.final_color,
+          data.final_materialCode,
+          data.final_diameter,
+          data.final_quant,
+          data.final_measureunit,
+          data.cus_total,
+          data.payment,
+          data.cus_advance || "",
+          data.salesID,
+        ]
+      )
+      .then((respo) => {
+        return true;
+      })
+      .catch((err) => {
+        console.log(err);
+        return false;
+      });
+  }
+
+  static async accptSales(id) {
+    return await db
+      .execute("UPDATE sales_order SET status = 'Accepted' WHERE id=" + id + "")
+      .then((respo) => {
+        return true;
+      })
+      .catch((err) => {
+        return false;
+      });
+  }
+
   static MakeSold(itemSold) {
     return db
       .execute("SELECT * FROM sales_store WHERE id = '" + itemSold.iD + "'")

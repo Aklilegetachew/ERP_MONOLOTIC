@@ -135,3 +135,14 @@ exports.addrequestion = (req, res, next) => {
     res.status(400).json("STORE REQUEST ERROR");
   }
 };
+
+exports.addaccsrequestion = (req, res, next) => {
+  storeRequestion.addstoreRequestionAccs(req.body).then((result) => {
+    if (result == false) {
+      res.status(200).json("STORE REQUEST ERROR");
+    }
+    {
+      res.status(200).json("STORE REQUEST ADDED");
+    }
+  });
+};

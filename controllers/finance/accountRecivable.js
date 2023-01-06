@@ -21,15 +21,28 @@ exports.addRecivable = async (req, res, next) => {
     });
 };
 
+exports.showProdutionCost = async (req, res, next) =>{
+  const salesCost = await accountRecivable.getProductionCost()
+
+  if (salesCost[0]) {
+    res.status(200).json(salesCost[1]);
+  } else {
+    res.status(400).json(salesCost[1]);
+  }
+}
+
+
+
 exports.makeCompelte = async (req, res, next) => {
- 
-    const results = await accountRecivable.updateComplete(req.body.ID);
-    if (results[0]) {
-      res.status(200).json(results[1]);
-    } else {
-      res.status(404).json(results[1]);
-    }
- 
+  console.log(req.body);
+  const salesOrder = await accountRecivable.getsalesOrder(req.body.ID);
+
+  const results = await accountRecivable.updateComplete(req.body, salesOrder[1]);
+  if (results[0]) {
+    res.status(200).json(results[1]);
+  } else {
+    res.status(404).json(results[1]);
+  }
 };
 
 exports.showSalesOrder = async (req, res, next) => {

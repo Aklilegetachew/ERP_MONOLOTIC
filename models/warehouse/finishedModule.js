@@ -52,20 +52,21 @@ module.exports = class accessory {
       parseFloat(newMaterialForm.finished_quantity);
     return db
       .execute(
-        "INSERT INTO finished_goods(finished_name, finished_quantity, finished_description, finished_materialcode, finished_spec, finished_materialunit, finished_value, finished_referncenum, finished_date, finished_remark, finished_catag, finished_diameter) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO finished_goods(finished_name, finished_quantity, finished_description, finished_materialcode, finished_spec, finished_materialunit, finished_value, finished_referncenum, finished_remark, finished_catag, finished_diameter, color, finished_mass) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           newMaterialForm.finished_name,
-          newMaterialForm.finished_quantity,
-          newMaterialForm.finished_description,
+          newMaterialForm.finished_quantity || "0",
+          newMaterialForm.finished_description || "-",
           newMaterialForm.finished_materialcode,
-          newMaterialForm.finished_spec,
-          newMaterialForm.finished_materialunit,
-          totalValue,
-          newMaterialForm.finished_referncenum,
-          newMaterialForm.finished_date,
-          newMaterialForm.finished_remark,
-          newMaterialForm.finished_catago,
+          newMaterialForm.finished_spec || "-",
+          newMaterialForm.finished_materialunit || "PCS",
+          totalValue || "0",
+          newMaterialForm.finished_referncenum || "-",
+          newMaterialForm.finished_remark || "-",
+          newMaterialForm.finished_name,
           newMaterialForm.finished_diameter,
+          newMaterialForm.color,
+          newMaterialForm.finished_mass,
         ]
       )
       .then(() => {
@@ -176,7 +177,8 @@ module.exports = class accessory {
     var updateQuan;
     if (oldMat[0].finished_quantity >= parseInt(newMat.fin_quantity)) {
       updateQuan =
-        parseInt(oldMat[0].finished_quantity) - parseInt(newMat.fin_quantity);
+        parseFloat(oldMat[0].finished_quantity) -
+        parseFloat(newMat.fin_quantity);
 
       return await db
         .execute(
@@ -187,10 +189,18 @@ module.exports = class accessory {
             "'"
         )
         .then((result) => {
+          const INMassIssued =
+            parseFloat(newMat.fin_quantity) *
+            parseFloat(oldMat[0].finished_mass);
+          const INAthand =
+            parseFloat(updateQuan) * parseFloat(oldMat[0].finished_mass);
+          console.log("FS number", newMat.salesID);
+          console.log("INAthand", INAthand);
+          console.log("INMassIssued", INMassIssued);
           const today = new Date();
           return db
             .execute(
-              "INSERT INTO summery(material_id, material_type, summery_date, stockat_hand, stock_recieved, stock_issued, department_issued, stockat_end) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+              "INSERT INTO summery(material_id, material_type, summery_date, stockat_hand, stock_recieved, stock_issued, department_issued, stockat_end, issues_kg, stockatend_kg, fs_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
               [
                 oldMat[0].id,
                 "FIN",
@@ -198,9 +208,24 @@ module.exports = class accessory {
                 oldMat[0].finished_quantity,
                 "",
                 newMat.fin_quantity,
-                newMat.fin_requestdept,
+                newMat.personID,
                 updateQuan,
+                INMassIssued,
+                INAthand,
+                newMat.fin_referncenum,
               ]
+
+              // "INSERT INTO summery(material_id, material_type, summery_date, stockat_hand, stock_recieved, stock_issued, department_issued, stockat_end) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+              // [
+              //   oldMat[0].id,
+              //   "FIN",
+              //   today,
+              //   oldMat[0].finished_quantity,
+              //   "",
+              //   newMat.fin_quantity,
+              //   newMat.fin_requestdept,
+              //   updateQuan,
+              // ]
             )
             .then((res) => {
               return "summery_Updated";
@@ -216,6 +241,7 @@ module.exports = class accessory {
 
   static checkExisFinM(newName, material_type, mat) {
     console.log("checker", mat);
+
     return db
       .execute(
         "SELECT * FROM finished_goods WHERE finished_name='" +
@@ -225,7 +251,7 @@ module.exports = class accessory {
           "' AND finished_materialcode = '" +
           mat.fin_materialcode +
           "' AND color= '" +
-          mat.final_color +
+          mat.fin_color +
           "'"
       )
       .then((result) => {

@@ -4,23 +4,94 @@ const salesAxios = require("../../midelware/salesaxios");
 const salesModle = require("../sales/salesOrder");
 
 module.exports = class accountRecivable {
+  static async getProductionCost() {
+    return await db
+      .execute("Select * From production_cost")
+      .then((respo) => {
+        return [true, respo[0]];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+
   static uniqueId() {
     const dateString = Date.now().toString(36);
     const randomness = Math.random().toString(36).substr(2);
     return dateString + randomness;
   }
 
-  static async updateComplete(ID) {
+  static async getsalesOrder(ID) {
     return await db
-      .execute(
-        "UPDATE sales_order_prod SET status = 'Cash' WHERE id = '" + ID + "'"
-      )
+      .execute("Select * From sales_order_prod WHERE id = '" + ID + "'")
       .then((respo) => {
-        return [true, "COMPLETED"];
+        return [true, respo[0][0]];
       })
       .catch((err) => {
         return [false, err];
       });
+  }
+
+  static async updateComplete(data, salesOrder) {
+    var advance = 0.0;
+    var newBalance = 0.0;
+    var oldbalance = 0.0;
+    var newadvance = 0.0;
+    console.log(salesOrder);
+    // { remaining: '456', ID: '5' }  totalCash advances
+    if (salesOrder.status == "Advanced") {
+      advance = parseFloat(salesOrder.advances);
+      oldbalance =
+        parseFloat(salesOrder.totalCash) - parseFloat(salesOrder.advances);
+      newBalance = oldbalance - parseFloat(data.remaining);
+      newadvance = parseFloat(advance) + parseFloat(data.remaining);
+    } else if (salesOrder.status == "Credit") {
+      oldbalance =
+        parseFloat(salesOrder.totalCash) - parseFloat(salesOrder.advances);
+      newBalance = oldbalance - parseFloat(data.remaining);
+      newadvance = parseFloat(data.remaining);
+    }
+
+    console.log("Advance", advance);
+    console.log("newBalance", newBalance);
+    console.log("oldbalance", oldbalance);
+    console.log("newadvance", newadvance);
+
+    // var newBalance = 0.0;
+    // var oldbalance = 0.0;
+    // var newadvance = 0.0;
+
+    if (newBalance !== 0) {
+      return await db
+        .execute(
+          "UPDATE sales_order_prod SET advances = '" +
+            newadvance +
+            "', balance = '" +
+            newBalance +
+            "' WHERE id = '" +
+            data.ID +
+            "'"
+        )
+        .then((respo) => {
+          return [true, "COMPLETED"];
+        })
+        .catch((err) => {
+          return [false, err];
+        });
+    } else {
+      return await db
+        .execute(
+          "UPDATE sales_order_prod SET status = 'Cash' WHERE id = '" +
+            data.ID +
+            "'"
+        )
+        .then((respo) => {
+          return [true, "Updated"];
+        })
+        .catch((err) => {
+          return [false, err];
+        });
+    }
   }
   static async showsalesProdOrder() {
     return await db
