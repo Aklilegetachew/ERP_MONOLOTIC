@@ -12,6 +12,7 @@ const searchController = require("../controllers/warehouse/searchCont");
 const router = express.Router();
 
 router.get("/rawmaterials", rawModule.getMaterials);
+router.get("/rawmaterialsforBatch", rawModule.getMaterialsbatch);
 router.post("/addnewrawmaterials", rawModule.addMaterials);
 router.post("/updatenewrawmaterials", rawModule.UpdateMaterials);
 

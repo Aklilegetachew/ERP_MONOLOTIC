@@ -348,7 +348,7 @@ module.exports = class productionModel {
     return db
       .execute(
         "SELECT * FROM custome_batch WHERE custom_batch_id = '" +
-          selectedOrder[0].custom_batch_id +
+          selectedOrder +
           "'"
       )
       .then((result) => {
@@ -574,7 +574,6 @@ module.exports = class productionModel {
       [
         newData.raw_needed,
         newData.expected_fin_qty || "",
-
         newData.salesID == "" ? UniqID : salesID,
       ]
     ).then((resu) => {
@@ -599,7 +598,7 @@ module.exports = class productionModel {
         ]
       )
       .then((resp) => {
-        return [true, "Production order added"];
+        return [true, UniqID];
       })
       .catch((err) => {
         return [false, err];

@@ -5,11 +5,24 @@ const { setTimeout } = require("timers/promises");
 
 exports.addNewproductionOrder = (req, res, next) => {
   console.log(req.body);
-  productionModel.addproductionOrder(req.body).then((result) => {
+  productionModel.addproductionOrder(req.body).then(async(result) => {
     if (result[0]) {
-      productionModel.GMStatus(req.body).then((resa) => {
-        res.status(200).json(result[1]);
-      });
+      const ChangeStatus = await productionModel.GMStatus(req.body)
+      
+      const makeBatchCosts = await productionModel.makeBatchCost(
+        result[1]
+      );
+      const filteredData = makeBatchCosts.filter(d => d.mat_quantity !== '-');
+
+      const costCalculated = await productionModel.calculateCost(
+        filteredData,
+        result[1] || "",
+        req.body.FS_NUMBER
+      );
+
+      res.status(200).json(result[1]);
+
+
     } else {
       res.status(400).json(result[1]);
     }
@@ -204,27 +217,10 @@ exports.startProduction = async (req, res, next) => {
     // select the order
 
     const selectedResult = await productionModel.selectOrder(productionId);
-
     // select and send the raw material to warehouse
     if (selectedResult[0]) {
-      const resultRawmaterial = await productionModel.makeRawMatRequest(
-        selectedResult[1],
-        productionId,
-        personId
-      );
 
-      const makeBatchCosts = await productionModel.makeBatchCost(
-        selectedResult[1]
-      );
-
-      const costCalculated = await productionModel.calculateCost(
-        makeBatchCosts,
-        productionId,
-        selectedResult[1][0].Fs_number
-      );
-
-      console.log(resultRawmaterial);
-      if (resultRawmaterial) {
+      if (selectedResult[0]) {
         const respoStatus = await productionModel.statusStarted(productionId);
 
         if (respoStatus[0]) {
