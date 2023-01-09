@@ -52,7 +52,7 @@ exports.resporawMaterialRequest = (req, res, next) =>{
   const status = req.status
   const id = request.id
   
-  if(status= "ACCEPT"){
+  if(status == "ACCEPT"){
 
   }else{
     

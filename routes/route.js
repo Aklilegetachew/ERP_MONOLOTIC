@@ -137,6 +137,10 @@ router.get("/showPettyCash", pettyCash.showCash);
 router.get("/showAssetMang", assetMangment.showAll);
 router.post("/showAssetByType", assetMangment.showAllType);
 
+router.post("/addExpense", assetMangment.addExpense)
+router.post("/showExpense", assetMangment.showExpense)
+
+
 ////////////////////////////////////////////////////////////////////////
 
 // Authentication

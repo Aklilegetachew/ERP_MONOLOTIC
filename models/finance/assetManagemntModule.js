@@ -7,6 +7,43 @@ module.exports = class AssetManagment {
     return dateString + randomness;
   }
 
+  static addExpenseAll(data) {
+    const today = Date().now;
+    return db
+      .execute(
+        "INSERT INTO expenses(date_expense, Item_description, uom, unit_price, total_price, fs_number, purchase_department, remark, catagory, addtional_info)VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+          data.date_expense || today,
+          data.Item_description || "-",
+          data.uom || "-",
+          data.unit_price || "0",
+          data.total_price || "0",
+          data.fs_number || "-",
+          data.purchase_department || "Finance",
+          data.remark || "-",
+          data.catagory || "Others",
+          data.addtional_info || "-",
+        ]
+      )
+      .then((resp) => {
+        return [true, "Expense Added"];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+
+  static showExpenseCat(data) {
+    return db
+      .execute("SELECT * FROM expenses WHERE catagory = ?", [data.Cat])
+      .then((respo) => {
+        return [true, respo[0]];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+
   static addAsset(dataID) {
     db.execute(
       "INSERT INTO asset_mang(asset_name, asset_spec, asset_quantity, asset_value, asset_exp, asset_status)VALUES(?, ?, ?, ?, ?, ?)",
