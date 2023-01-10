@@ -13,6 +13,15 @@ module.exports = class productionModel {
     return dateString + randomness;
   }
 
+  static saveCostDetail(data, finshedMass) {
+    // costCalculated returns [totalperone, totalValue, totalMass]
+    var totalperone = data[0];
+    var totalValue = data[1];
+    var totalMass = data[2];
+    var finishedMass = finishedMass;
+    
+  }
+
   static addrawMaterialRequest(materials, fs_number, batch) {
     console.log(fs_number);
     console.log(materials.raw_materialcode);
@@ -104,13 +113,17 @@ module.exports = class productionModel {
         return [false, err];
       });
   }
-  static async fetchFinMass(name, des) {
+  static async fetchFinMass(name, materialCode, color, diameter) {
     return await db
       .execute(
-        "SELECT * FROM finished_goods WHERE 	finished_name = '" +
+        "SELECT * FROM finished_goods WHERE finished_name = '" +
           name +
-          "' AND finished_description = '" +
-          des +
+          "' AND finished_materialcode = '" +
+          materialCode +
+          "' AND color = '" +
+          color +
+          "' AND finished_diameter = '" +
+          diameter +
           "'"
       )
       .then((respo) => {
@@ -453,6 +466,7 @@ module.exports = class productionModel {
     }
 
     totalperone = totalValue / totalMass;
+    return [totalperone, totalValue, totalMass];
     try {
       await db.execute(
         "UPDATE production_cost SET totalmass = ?, valueper1kg = ?, totalValue = ? WHERE production_id = ?",

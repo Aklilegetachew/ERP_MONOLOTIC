@@ -5,14 +5,12 @@ const { setTimeout } = require("timers/promises");
 
 exports.addNewproductionOrder = (req, res, next) => {
   console.log(req.body);
-  productionModel.addproductionOrder(req.body).then(async(result) => {
+  productionModel.addproductionOrder(req.body).then(async (result) => {
     if (result[0]) {
-      const ChangeStatus = await productionModel.GMStatus(req.body)
-      
-      const makeBatchCosts = await productionModel.makeBatchCost(
-        result[1]
-      );
-      const filteredData = makeBatchCosts.filter(d => d.mat_quantity !== '-');
+      const ChangeStatus = await productionModel.GMStatus(req.body);
+
+      const makeBatchCosts = await productionModel.makeBatchCost(result[1]);
+      const filteredData = makeBatchCosts.filter((d) => d.mat_quantity !== "-");
 
       const costCalculated = await productionModel.calculateCost(
         filteredData,
@@ -20,9 +18,17 @@ exports.addNewproductionOrder = (req, res, next) => {
         req.body.FS_NUMBER
       );
 
+      // costCalculated returns [totalperone, totalValue, totalMass]
+
+      const massperFin = await productionModel.fetchFinMass(
+        req.body.fin_product,
+        req.body.finished_materialcode,
+        req.body.final_color,
+        req.body.finished_diameter
+      );
+      const costSummery = await productionModel.saveCostDetail(costCalculated, massperFin);
+
       res.status(200).json(result[1]);
-
-
     } else {
       res.status(400).json(result[1]);
     }
@@ -61,16 +67,14 @@ exports.showrawMaterialRequest = (req, res, next) => {
   });
 };
 
-exports.resporawMaterialRequest = (req, res, next) =>{
-  const status = req.status
-  const id = request.id
-  
-  if(status == "ACCEPT"){
+exports.resporawMaterialRequest = (req, res, next) => {
+  const status = req.status;
+  const id = request.id;
 
-  }else{
-    
+  if (status == "ACCEPT") {
+  } else {
   }
-}
+};
 
 exports.showProductionGM = (req, res, next) => {
   productionModel.showallProductionGM().then((result) => {
@@ -219,7 +223,6 @@ exports.startProduction = async (req, res, next) => {
     const selectedResult = await productionModel.selectOrder(productionId);
     // select and send the raw material to warehouse
     if (selectedResult[0]) {
-
       if (selectedResult[0]) {
         const respoStatus = await productionModel.statusStarted(productionId);
 
