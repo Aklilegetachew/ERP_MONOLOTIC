@@ -13,13 +13,71 @@ module.exports = class productionModel {
     return dateString + randomness;
   }
 
-  static saveCostDetail(data, finshedMass) {
+  static async deleteOrderGM(data) {
+    return await db
+      .execute(
+        "UPDATE productionordergm SET final_status = 'declined' WHERE id = ?",
+        [data.GM]
+      )
+      .then((res) => {
+        return true;
+      })
+      .catch((err) => {
+        console.log(err);
+        return false;
+      });
+  }
+
+  static async deleteOrder(data) {
+    return await db
+      .execute(
+        "UPDATE production_order SET status = 'declined' WHERE custom_batch_id = ?",
+        [data.id]
+      )
+      .then((res) => {
+        return true;
+      })
+      .catch((err) => {
+        console.log(err);
+        return false;
+      });
+  }
+
+  static saveCostDetail(data, finshedMass, batchID) {
     // costCalculated returns [totalperone, totalValue, totalMass]
-    var totalperone = data[0];
-    var totalValue = data[1];
-    var totalMass = data[2];
-    var finishedMass = finishedMass;
-    
+    var totalperone = data[0]; // price of 1 kg
+    var totalValue = data[1]; // total cost of raw material
+    var totalMass = data[2]; // total mass of raw material
+    var finishedMass = finshedMass; // mass of 1 finished good
+    var costofFinshed =
+      parseFloat(finishedMass).toFixed(2) * parseFloat(totalperone).toFixed(2);
+    var totalquantityProduce =
+      parseFloat(totalMass).toFixed(2) / parseFloat(finishedMass).toFixed(2);
+    var otherCost = parseFloat(costofFinshed).toFixed(2) * 0.15; // other cost of finished good
+    var totalProductionCost = otherCost + costofFinshed;
+
+    return db
+      .execute(
+        "INSERT INTO cost_summery(production_id, total_raw_cost, total_mass, oneKgCost, oneFinCost, quantityProduced, finished_mass, other_cost, cost_status, finishedWVat)VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+          data[3],
+          totalValue.toFixed(2),
+          totalMass,
+          totalperone.toFixed(2),
+          costofFinshed.toFixed(2),
+          totalquantityProduce.toFixed(2),
+          finishedMass,
+          otherCost.toFixed(2),
+          "NEW",
+          totalProductionCost.toFixed(2),
+        ]
+      )
+      .then((respo) => {
+        return [true, "Production Cost Added"];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
   }
 
   static addrawMaterialRequest(materials, fs_number, batch) {
@@ -62,7 +120,7 @@ module.exports = class productionModel {
   static GMStatus(data) {
     return db
       .execute(
-        "UPDATE productionordergm SET final_status = 'PM Approved' WHERE id = '" +
+        "UPDATE productionordergm SET final_status = 'Pending Approval' WHERE id = '" +
           data.GMID +
           "'"
       )
@@ -466,7 +524,7 @@ module.exports = class productionModel {
     }
 
     totalperone = totalValue / totalMass;
-    return [totalperone, totalValue, totalMass];
+    return [totalperone, totalValue, totalMass, productionId];
     try {
       await db.execute(
         "UPDATE production_cost SET totalmass = ?, valueper1kg = ?, totalValue = ? WHERE production_id = ?",
@@ -595,7 +653,7 @@ module.exports = class productionModel {
     });
     return db
       .execute(
-        "INSERT INTO production_order(fin_product, fin_desc, fin_spec, fin_quan, finished_materialcode, finished_diameter, start_dateTime, mesuring_unit, final_color, status, custom_batch_id, Fs_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO production_order(fin_product, fin_desc, fin_spec, fin_quan, finished_materialcode, finished_diameter, start_dateTime, mesuring_unit, final_color, status, custom_batch_id, Fs_number, GmID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           newData.fin_product,
           newData.fin_desc || "",
@@ -609,6 +667,7 @@ module.exports = class productionModel {
           newData.status,
           newData.salesID == "" ? UniqID : salesID,
           newData.FS_NUMBER,
+          newData.GMID,
         ]
       )
       .then((resp) => {
@@ -741,7 +800,7 @@ module.exports = class productionModel {
   static showProductionOrderCustom() {
     return db
       .execute(
-        "SELECT production_order.*, custome_batch.raw_mat_needed, custome_batch.id AS CID FROM production_order, custome_batch WHERE production_order.custom_batch_id = custome_batch.custom_batch_id"
+        "SELECT production_order.*, custome_batch.raw_mat_needed, cost_summery.*, custome_batch.id AS CID FROM production_order, cost_summery, custome_batch WHERE production_order.custom_batch_id = custome_batch.custom_batch_id AND production_order.custom_batch_id = cost_summery.production_id"
       )
       .then((respo) => {
         return respo[0];

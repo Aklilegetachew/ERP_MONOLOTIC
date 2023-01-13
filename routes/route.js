@@ -97,7 +97,7 @@ router.post("/rawmaterialRequest", production.rawMaterialRequest);
 router.get("/showrawmaterialRequest", production.showrawMaterialRequest);
 router.get("/rawmaterialRequestResponse", production.resporawMaterialRequest);
 
-
+router.post("/deleteProductionOrderRow", production.deleteOrder);
 router.post("/addProductProduced", production.productFinshed);
 router.get("/showFinishedProduction", production.showFinishedProduction);
 router.post("/makeSummery", production.summeryMaker);
@@ -138,9 +138,8 @@ router.get("/showPettyCash", pettyCash.showCash);
 router.get("/showAssetMang", assetMangment.showAll);
 router.post("/showAssetByType", assetMangment.showAllType);
 
-router.post("/addExpense", assetMangment.addExpense)
-router.post("/showExpense", assetMangment.showExpense)
-
+router.post("/addExpense", assetMangment.addExpense);
+router.post("/showExpense", assetMangment.showExpense);
 
 ////////////////////////////////////////////////////////////////////////
 

@@ -3,8 +3,22 @@ const { response } = require("express");
 const productionModel = require("../../models/Production/productionModel");
 const { setTimeout } = require("timers/promises");
 
+exports.deleteOrder = async (req, res, next) => {
+  const result = await productionModel.deleteOrderGM(req.body);
+  if (result) {
+    const result2 = await productionModel.deleteOrder(req.body);
+    if (result2) {
+      res.status(200).json({ message: "deleted" });
+    } else {
+      res.status(400).json({ message: "Production order deleted" });
+    }
+  } else {
+    res.status(400).json({ message: "GM Production order deleted" });
+  }
+};
+
 exports.addNewproductionOrder = (req, res, next) => {
-  console.log(req.body);
+  console.log("Incomming data", req.body);
   productionModel.addproductionOrder(req.body).then(async (result) => {
     if (result[0]) {
       const ChangeStatus = await productionModel.GMStatus(req.body);
@@ -26,9 +40,13 @@ exports.addNewproductionOrder = (req, res, next) => {
         req.body.final_color,
         req.body.finished_diameter
       );
-      const costSummery = await productionModel.saveCostDetail(costCalculated, massperFin);
+      const costSummery = await productionModel.saveCostDetail(
+        costCalculated,
+        massperFin,
+        result[1]
+      );
 
-      res.status(200).json(result[1]);
+      res.status(200).json(costSummery[1]);
     } else {
       res.status(400).json(result[1]);
     }
