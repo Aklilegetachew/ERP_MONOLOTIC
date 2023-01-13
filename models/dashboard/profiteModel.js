@@ -44,15 +44,19 @@ module.exports = class ProfiteModule {
       });
   }
 
-  static fetchDiameters(nameselection){
+  static fetchDiameters(nameselection) {
     return db
-    .execute("SELECT finished_description FROM finished_goods WHERE finished_name = '"+nameselection+"'")
-    .then((respo) => {
-      return [true, respo[0]];
-    })
-    .catch((err) => {
-      return [false, err];
-    });
+      .execute(
+        "SELECT DISTINCT(finished_description) FROM finished_goods WHERE finished_name = '" +
+          nameselection +
+          "'"
+      )
+      .then((respo) => {
+        return [true, respo[0]];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
   }
 
   static async fetchproductsold(keyWord) {
