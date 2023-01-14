@@ -13,6 +13,22 @@ module.exports = class productionModel {
     return dateString + randomness;
   }
 
+  static async AproveBatch(data){
+    return await db
+    .execute(
+      "UPDATE productionordergm SET final_status = 'declined' WHERE id = ?",
+      [data.GM]
+    )
+    .then((res) => {
+      return true;
+    })
+    .catch((err) => {
+      console.log(err);
+      return false;
+    });
+
+  }
+
   static async deleteOrderGM(data) {
     return await db
       .execute(

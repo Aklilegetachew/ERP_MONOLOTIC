@@ -243,7 +243,9 @@ exports.startProduction = async (req, res, next) => {
     if (selectedResult[0]) {
       if (selectedResult[0]) {
         const respoStatus = await productionModel.statusStarted(productionId);
-
+        const approvedBatch = await productionModel.AproveBatch(
+          selectedResult[1]
+        );
         if (respoStatus[0]) {
           res.status(200).json({ message: "Started !" });
         } else {
