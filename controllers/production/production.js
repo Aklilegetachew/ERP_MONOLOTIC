@@ -151,7 +151,9 @@ exports.productFinshed = async (req, res, next) => {
       const respo = await productionModel.sendtoWareHouse(req.body);
 
       const resu = await productionModel.makeFinished(req.body);
-      const rawUsed = await productionModel.fetchRawMatused(req.body.salesID);
+      const BatchNum = await productionModel.UpdateBatchNumber(req.body);
+
+      // const rawUsed = await productionModel.fetchRawMatused(req.body.salesID);
       // const massperFin = await productionModel.fetchFinMass(
       //   req.body.new_name,
       //   req.body.new_description
@@ -243,10 +245,13 @@ exports.startProduction = async (req, res, next) => {
     if (selectedResult[0]) {
       if (selectedResult[0]) {
         const respoStatus = await productionModel.statusStarted(productionId);
-        const approvedBatch = await productionModel.AproveBatch(
-          selectedResult[1]
+        const approvedBatch = await productionModel.AprovePMSubmit(
+          selectedResult[1][0]
         );
-        if (respoStatus[0]) {
+        const AproveBatchCost = await productionModel.AproveBatchCost(
+          selectedResult[1][0]
+        );
+        if (AproveBatchCost) {
           res.status(200).json({ message: "Started !" });
         } else {
           res.status(428).json({ message: "update status error" });

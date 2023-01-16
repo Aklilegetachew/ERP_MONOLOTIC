@@ -13,20 +13,42 @@ module.exports = class productionModel {
     return dateString + randomness;
   }
 
-  static async AproveBatch(data){
-    return await db
-    .execute(
-      "UPDATE productionordergm SET final_status = 'declined' WHERE id = ?",
-      [data.GM]
-    )
-    .then((res) => {
-      return true;
-    })
-    .catch((err) => {
-      console.log(err);
-      return false;
-    });
+  static UpdateBatchNumber(Data) {
 
+
+
+
+    
+  }
+  static async AprovePMSubmit(data) {
+    console.log("data", data);
+    return await db
+      .execute(
+        "UPDATE productionordergm SET final_status = 'Approved' WHERE id = ?",
+        [data.GmID]
+      )
+      .then((res) => {
+        return true;
+      })
+      .catch((err) => {
+        console.log(err);
+        return false;
+      });
+  }
+
+  static async AproveBatchCost(data) {
+    return await db
+      .execute(
+        "UPDATE cost_summery SET cost_status = 'Approved' WHERE production_id = ?",
+        [data.custom_batch_id]
+      )
+      .then((res) => {
+        return true;
+      })
+      .catch((err) => {
+        console.log(err);
+        return false;
+      });
   }
 
   static async deleteOrderGM(data) {
@@ -315,7 +337,7 @@ module.exports = class productionModel {
 
     return db
       .execute(
-        "INSERT INTO produced(productionID, finished_name, finished_spec, finished_qty, personID, finished_description, finished_materialunit, finished_remark, finished_materialcode, mat_color) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO produced(productionID, finished_name, finished_spec, finished_qty, personID, finished_description, finished_materialunit, finished_remark, finished_materialcode, mat_color, waste_quantity, waste_uom) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           data.prodID,
           data.new_name,
@@ -327,6 +349,8 @@ module.exports = class productionModel {
           data.new_remark || "",
           data.new_materialcode || "",
           data.new_color || "",
+          data.waste_quantity,
+          data.waste_unit,
         ]
       )
       .then((result) => {
