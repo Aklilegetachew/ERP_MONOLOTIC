@@ -14,11 +14,20 @@ module.exports = class productionModel {
   }
 
   static UpdateBatchNumber(Data) {
+    console.log("UPDATER", Data);
+    return db
 
-
-
-
-    
+      .execute(
+        "UPDATE cost_summery SET batchNum = batchNum + 1 WHERE production_id = ?",
+        [Data.batchID]
+      )
+      .then((respo) => {
+        return true;
+      })
+      .catch((err) => {
+        console.log(err);
+        return false;
+      });
   }
   static async AprovePMSubmit(data) {
     console.log("data", data);
@@ -286,11 +295,12 @@ module.exports = class productionModel {
   }
 
   static async makeFinished(data) {
-    const leftamaount =
+    var leftamaount =
       parseFloat(data.oldQuantity) - parseFloat(data.new_quantity);
 
     let status;
-    if (leftamaount === 0) {
+    if (leftamaount === 0 || leftamaount < 0) {
+      leftamaount = 0;
       status = "FINISHED";
     } else {
       status = "STARTED";

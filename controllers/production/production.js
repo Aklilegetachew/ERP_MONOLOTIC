@@ -152,7 +152,11 @@ exports.productFinshed = async (req, res, next) => {
 
       const resu = await productionModel.makeFinished(req.body);
       const BatchNum = await productionModel.UpdateBatchNumber(req.body);
-
+      if (BatchNum) {
+        res.status(200).json({ message: "submitted Sucessfully " });
+      } else {
+        res.status(403).json({ message: "error requesting" });
+      }
       // const rawUsed = await productionModel.fetchRawMatused(req.body.salesID);
       // const massperFin = await productionModel.fetchFinMass(
       //   req.body.new_name,
