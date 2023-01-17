@@ -96,6 +96,7 @@ router.post("/startProduction", production.startProduction);
 router.post("/rawmaterialRequest", production.rawMaterialRequest);
 router.get("/showrawmaterialRequest", production.showrawMaterialRequest);
 router.get("/rawmaterialRequestResponse", production.resporawMaterialRequest);
+router.post("/editBatch", production.editBatch)
 
 router.post("/deleteProductionOrderRow", production.deleteOrder);
 router.post("/addProductProduced", production.productFinshed);

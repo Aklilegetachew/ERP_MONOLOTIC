@@ -17,6 +17,24 @@ exports.deleteOrder = async (req, res, next) => {
   }
 };
 
+exports.editBatch = async (req, res, next) => {
+  // step 1: Adding new production order with new Status
+
+  productionModel.updateStateProduction(req.body).then(async (result) => {
+    if (result) {
+      res.status(200).json("Batch Edited");
+    } else {
+      res.status(400).json("error");
+    }
+  });
+
+  // step 2:  add production batch formula
+
+  // step 3: production order cost
+
+  // step 4: old production order into Finished status
+};
+
 exports.addNewproductionOrder = (req, res, next) => {
   console.log("Incomming data", req.body);
   productionModel.addproductionOrder(req.body).then(async (result) => {

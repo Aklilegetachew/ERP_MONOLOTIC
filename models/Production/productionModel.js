@@ -13,6 +13,20 @@ module.exports = class productionModel {
     return dateString + randomness;
   }
 
+  static updateStateProduction(data) {
+    return db
+      .execute("UPDATE production_order SET status = 'Finished' WHERE id = ?", [
+        data.id,
+      ])
+      .then((respo) => {
+        return true;
+      })
+      .catch((err) => {
+        console.log(err);
+        return false;
+      });
+  }
+
   static UpdateBatchNumber(Data) {
     console.log("UPDATER", Data);
     return db
