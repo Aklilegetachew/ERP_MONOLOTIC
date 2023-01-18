@@ -11,7 +11,7 @@ module.exports = class AssetManagment {
     const today = Date().now;
     return db
       .execute(
-        "INSERT INTO expenses(date_expense, Item_description, uom, unit_price, total_price, fs_number, purchase_department, remark, catagory, addtional_info)VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO expenses(date_expense, Item_description, uom, unit_price, total_price, fs_number, purchase_department, remark, catagory, addtional_info, expense_qunatity)VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           data.date_expense || today,
           data.Item_description || "-",
@@ -23,6 +23,7 @@ module.exports = class AssetManagment {
           data.remark || "-",
           data.catagory || "Others",
           data.addtional_info || "-",
+          data.expense_quantity || "1",
         ]
       )
       .then((resp) => {

@@ -32,6 +32,7 @@ exports.showAll = (req, res, next) => {
 };
 
 exports.addExpense = (req, res, next) => {
+  console.log(req.body);
   assetManagemnt.addExpenseAll(req.body).then((respo) => {
     if (respo[0]) {
       res.status(200).json({ message: respo[1] });
@@ -44,9 +45,9 @@ exports.addExpense = (req, res, next) => {
 exports.showExpense = (req, res, next) => {
   assetManagemnt.showExpenseCat(req.body).then((respo) => {
     if (respo[0]) {
-      res.status(200).json({ message: respo[1] });
+      res.status(200).json(respo[1]);
     } else {
-      res.status(400).json({ message: respo[1] });
+      res.status(400).json(respo[1]);
     }
   });
 };
