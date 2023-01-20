@@ -23,6 +23,16 @@ module.exports = class ProfiteModule {
         return [false, err];
       });
   }
+  static expenseMonthly(data){
+    return db
+    .execute("SELECT SUM(total_price) AS TOTALEXP FROM expenses WHERE MONTH(date_expense) = MONTH(CURRENT_DATE()) AND YEAR(date_expense) = YEAR(CURRENT_DATE())")
+    .then((respo) => {
+      return [true, respo[0]];
+    })
+    .catch((err) => {
+      return [false, err];
+    }); 
+  }
   static fetchUncollected() {
     return db
       .execute("SELECT * FROM sales_order_prod WHERE status != 'Cash'")

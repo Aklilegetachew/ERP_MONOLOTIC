@@ -40,6 +40,7 @@ router.post("/accsRequestion", requstion.addaccsrequestion);
 
 router.post("/showSummeryByID", summery.showById);
 router.post("/showSummeryByMonth", summery.showByIdMonth);
+router.post("/showExpenseByMonth", summery.showByIdExpense);
 router.post("/showSummeryByYear", summery.showByIdYear);
 router.post("/showAllByType", summery.showByType);
 
@@ -164,6 +165,7 @@ router.get("/donutgraph", dashboard.groupsalesProduct);
 router.get("/salesOnlyUncollected", dashboard.Uncollected);
 router.get("/getprofitDetail", dashboard.getProfitDetail);
 router.get("/lastFiveSalesOrders", dashboard.getLastFive);
+router.get("/getMonthExpense", dashboard.monthlyExpense)
 
 ///////////////////////////////////////////////////////////
 router.post("/diameterSelect", dashboard.selectDiameter);

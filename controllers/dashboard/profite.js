@@ -21,6 +21,17 @@ exports.selectDiameter = (req, res, next) => {
   });
 };
 
+exports.monthlyExpense = (req, res, next) => {
+
+  profit.expenseMonthly(req.body).then((respo) => {
+    if (respo[0]) {
+      res.status(200).json(respo[1][0]);
+    } else {
+      res.status(400).json(respo[1]);
+    }
+  });
+};
+
 exports.getLastFive = (req, res, next) => {
   profit.showlastFiveRecords().then((respo) => {
     if (respo[0]) {

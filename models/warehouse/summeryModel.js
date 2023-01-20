@@ -118,6 +118,50 @@ module.exports = class storeRequestion {
     }
   }
 
+  static viewExpenseByMonth(id, materialType, selectedDate, selectedYear) {
+    console.log("year", selectedYear);
+    if (selectedDate.start == undefined && selectedYear == "") {
+      console.log("Hello");
+      const currentMonth = new Date().getMonth();
+
+      return db
+        .execute("SELECT * FROM expenses")
+        .then((result) => {
+          var monthlyData = [];
+          console.log(result[0]);
+
+          return result[0];
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } else if (selectedDate.start !== undefined && selectedYear == "") {
+      return db
+        .execute(
+          "SELECT * FROM expenses WHERE date_expense >= DAte(?) AND date_expense <= Date(?)",
+          [selectedDate.start, selectedDate.end]
+        )
+        .then((result) => {
+          return result[0];
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } else if (selectedDate.start !== undefined && selectedYear !== "") {
+      return db
+        .execute(
+          "SELECT * FROM expenses WHERE date_expense >= Date(?) AND date_expense <= Date(?) AND date_expense like ?",
+          [selectedDate.start, selectedDate.end, selectedYear + "%"]
+        )
+        .then((result) => {
+          return result[0];
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  }
+
   static viewSummeryYear(id, materialType, selectedYear) {
     if (selectedYear == "") {
       const currentYear = new Date().getFullYear();
