@@ -89,11 +89,7 @@ module.exports = class ProfiteModule {
   static async fetchProductionCost(salesID) {
     return await db
       .execute(
-        " SELECT * FROM dashboard_profit_detail t1 JOIN dashboard_profit t2 ON t1.salesId = '" +
-          salesID +
-          "' AND t2.salesID = '" +
-          salesID +
-          "'"
+        " SELECT cost_summery.*, production_cost.* FROM cost_summery, production_cost WHERE cost_summery.production_id = ? AND production_cost.production_id = ? ", [salesID,salesID]
       )
       .then((respo) => {
         return [true, respo[0]];

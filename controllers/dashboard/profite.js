@@ -22,7 +22,6 @@ exports.selectDiameter = (req, res, next) => {
 };
 
 exports.monthlyExpense = (req, res, next) => {
-
   profit.expenseMonthly(req.body).then((respo) => {
     if (respo[0]) {
       res.status(200).json(respo[1][0]);
@@ -92,7 +91,7 @@ exports.groupsalesProduct = async (req, res, next) => {
 };
 
 exports.selectProductionCost = (req, res, next) => {
-  profit.fetchProductionCost(req.body.salesID).then((respo) => {
+  profit.fetchProductionCost(req.body.ProdID).then((respo) => {
     console.log(respo);
     if (respo[0]) {
       res.status(200).json(respo[1]);

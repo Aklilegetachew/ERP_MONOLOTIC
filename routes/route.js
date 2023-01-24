@@ -97,7 +97,7 @@ router.post("/startProduction", production.startProduction);
 router.post("/rawmaterialRequest", production.rawMaterialRequest);
 router.get("/showrawmaterialRequest", production.showrawMaterialRequest);
 router.get("/rawmaterialRequestResponse", production.resporawMaterialRequest);
-router.post("/editBatch", production.editBatch)
+router.post("/editBatch", production.editBatch);
 
 router.post("/deleteProductionOrderRow", production.deleteOrder);
 router.post("/addProductProduced", production.productFinshed);
@@ -120,7 +120,9 @@ router.post("/accountPayable", accountPayable.addaccountPayable);
 router.post("/accountPayed", accountPayable.responsPayable);
 router.get("/showaccountpayable", accountPayable.showAllPayable);
 router.post("/showReasonById", accountPayable.showReasonById);
-router.get("/showProductionCost", accountRecivable.showProdutionCost);
+router.get("/showProductionCost", accountRecivable.showProductionCost);
+router.post("/generateProfit", accountRecivable.generateProfit);
+router.get("/showsalesProfit", accountRecivable.showSalesProfit);
 
 // change the cash managment part updating the value
 
@@ -129,6 +131,7 @@ router.get("/showaccountRecivable", accountRecivable.showRecivable);
 router.post("/completeSalesOrder", accountPayable.makeCompelte);
 router.post("/completeRecibableSalesOrder", accountRecivable.makeCompelte);
 router.get("/shoesalesOrderProd", accountRecivable.showSalesOrder);
+router.get("/showsalesOrderprofit", accountRecivable.showSalesOrderPro);
 router.post("/shoesalesOrderProdById", accountRecivable.showSalesOrderById);
 
 router.post("/subAsset", assetMangment.subAsset);
@@ -165,7 +168,7 @@ router.get("/donutgraph", dashboard.groupsalesProduct);
 router.get("/salesOnlyUncollected", dashboard.Uncollected);
 router.get("/getprofitDetail", dashboard.getProfitDetail);
 router.get("/lastFiveSalesOrders", dashboard.getLastFive);
-router.get("/getMonthExpense", dashboard.monthlyExpense)
+router.get("/getMonthExpense", dashboard.monthlyExpense);
 
 ///////////////////////////////////////////////////////////
 router.post("/diameterSelect", dashboard.selectDiameter);

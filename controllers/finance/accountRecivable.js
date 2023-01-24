@@ -21,23 +21,75 @@ exports.addRecivable = async (req, res, next) => {
     });
 };
 
-exports.showProdutionCost = async (req, res, next) =>{
-  const salesCost = await accountRecivable.getProductionCost()
+exports.generateProfit = async (req, res, next) => {
+  let profit = 0.0;
 
-  if (salesCost[0]) {
-    res.status(200).json(salesCost[1]);
+  // fetch sales Info
+  const salesInfo = await accountRecivable.fetchSalesInfo(req.body);
+
+  // fetch cost From Batch
+  const CostInfo = await accountRecivable.fetchCostSummery(req.body);
+
+  if (req.body.VAT == 0) {
+    profit =
+      parseFloat(salesInfo[1].totalCash) -
+      parseFloat(CostInfo[1].finishedWVat) * parseFloat(salesInfo[1].total_product);
   } else {
-    res.status(400).json(salesCost[1]);
+
+    profit =
+      parseFloat(salesInfo[1].totalCash) -
+      (parseFloat(CostInfo[1].finishedWVat) *
+        0.15 *
+        parseFloat(salesInfo[1].total_product));
   }
-}
+  console.log("salesInfo:", salesInfo);
+  console.log("CostInfo:", CostInfo);
+  console.log("profit:", profit);
 
+  // save profit to profit table
+  const saveToProfit = await accountRecivable.ProfitStore(
+    salesInfo[1],
+    CostInfo[1],
+    req.body,
+    profit
+  );
+  const confirmGenerated = await accountRecivable.confirmGenerated(req.body.salesID)
 
+  if (confirmGenerated[0]) {
+    res.status(200).json(confirmGenerated[1]);
+  } else {
+    res.status(400).json(confirmGenerated[1]);
+  }
+};
+
+exports.showSalesProfit = async (req, res, next) => {
+  const salesOrder = await accountRecivable.getsalesProfit();
+  if (salesOrder[0]) {
+    res.status(200).json(salesOrder[1]);
+  } else {
+    res.status(404).json(salesOrder[1]);
+  }
+ 
+};
+
+exports.showProductionCost = async (req, res, next) => {
+  const salesOrder = await accountRecivable.getProductionCost();
+  if (salesOrder[0]) {
+    res.status(200).json(salesOrder[1]);
+  } else {
+    res.status(404).json(salesOrder[1]);
+  }
+ 
+};
 
 exports.makeCompelte = async (req, res, next) => {
   console.log(req.body);
   const salesOrder = await accountRecivable.getsalesOrder(req.body.ID);
 
-  const results = await accountRecivable.updateComplete(req.body, salesOrder[1]);
+  const results = await accountRecivable.updateComplete(
+    req.body,
+    salesOrder[1]
+  );
   if (results[0]) {
     res.status(200).json(results[1]);
   } else {
@@ -47,6 +99,15 @@ exports.makeCompelte = async (req, res, next) => {
 
 exports.showSalesOrder = async (req, res, next) => {
   const result = await accountRecivable.showsalesProdOrder();
+
+  if (result[0]) {
+    res.status(200).json(result[1]);
+  } else {
+    res.status(400).json(result[1]);
+  }
+};
+exports.showSalesOrderPro = async (req, res, next) => {
+  const result = await accountRecivable.showsalesProdOrderPro();
 
   if (result[0]) {
     res.status(200).json(result[1]);

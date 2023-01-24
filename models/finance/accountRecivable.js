@@ -5,10 +5,84 @@ const salesModle = require("../sales/salesOrder");
 
 module.exports = class accountRecivable {
   static async getProductionCost() {
-    return await db
-      .execute("Select * From production_cost")
+    return db
+      .execute(
+        "SELECT production_order.*, custome_batch.raw_mat_needed, cost_summery.*, custome_batch.id AS CID FROM production_order, cost_summery, custome_batch WHERE cost_summery.cost_status = 'Approved' AND production_order.custom_batch_id = custome_batch.custom_batch_id AND production_order.custom_batch_id = cost_summery.production_id"
+      )
       .then((respo) => {
         return [true, respo[0]];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+  static async confirmGenerated(salesID) {
+    return db
+      .execute("UPDATE sales_order_prod SET profitGenerated = 1 WHERE id = ?", [
+        salesID,
+      ])
+      .then((respo) => {
+        return [true, "Profit Done"];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+  static async fetchSalesInfo(data) {
+    console.log("datas to use", data);
+    return await db
+      .execute("SELECT * FROM sales_order_prod WHERE id = ?", [data.salesID])
+      .then((respo) => {
+        return [true, respo[0][0]];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+
+  static async getsalesProfit() {
+    return await db
+      .execute(
+        "SELECT sales_order_prod.*, sales_order_prod.id AS SID, dashboard_profit.* FROM sales_order_prod, dashboard_profit WHERE sales_order_prod.id = dashboard_profit.salesID"
+      )
+      .then((respo) => {
+        return [true, respo[0]];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+
+  static async ProfitStore(salesInfo, costInfo, dataSubmited, profit) {
+    console.log("inputs", dataSubmited);
+    console.log("profit", profit);
+    console.log("salesI", salesInfo);
+    console.log("cost", costInfo);
+
+    return await db
+      .execute(
+        "INSERT INTO dashboard_profit (salesID, producedId, total_sales, profit, vat) VALUES (?, ?, ?, ?, ?)",
+        [
+          dataSubmited.salesID,
+          costInfo.production_id,
+          salesInfo.totalCash,
+          profit,
+          dataSubmited.VAT,
+        ]
+      )
+      .then((respo) => {
+        return [true, "PROFIT GENERATED"];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+  static async fetchCostSummery(data) {
+    console.log("datas to use", data);
+    return await db
+      .execute("SELECT * FROM cost_summery WHERE cost_id = ?", [data.costId])
+      .then((respo) => {
+        return [true, respo[0][0]];
       })
       .catch((err) => {
         return [false, err];
@@ -104,9 +178,23 @@ module.exports = class accountRecivable {
       });
   }
 
+  static async showsalesProdOrderPro() {
+    return await db
+      .execute("SELECT * FROM sales_order_prod WHERE profitGenerated = 0")
+      .then((respo) => {
+        return [true, respo[0]];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+
   static async showsalesProdOrderID(ID) {
     return await db
-      .execute("SELECT * FROM sales_order_prod WHERE id = '" + ID + "'")
+      .execute(
+        "SELECT sales_order_prod.*, sales_order_prod.id AS SID, dashboard_profit.* FROM sales_order_prod, dashboard_profit WHERE sales_order_prod.id = ? AND dashboard_profit.salesID = ?",
+        [ID, ID]
+      )
       .then((respo) => {
         return [true, respo[0]];
       })
@@ -211,7 +299,7 @@ module.exports = class accountRecivable {
         return [true, GID];
       })
       .catch((err) => {
-        console.log("errrrrrrrrrrrrrrrr", err);
+        console.log("err", err);
         return [false, err];
       });
   }
