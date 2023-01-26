@@ -3,7 +3,19 @@ const db = require("../../util/db");
 module.exports = class rawMaterial {
   static getallMaterials() {
     return db
-      .execute("SELECT raw_name, raw_materialcode, raw_materialunit FROM raw_materials")
+      .execute("SELECT * FROM raw_materials")
+      .then((result) => {
+        return result[0];
+      })
+      .catch((err) => {
+        return err;
+      });
+  }
+  static getallMaterialsB() {
+    return db
+      .execute(
+        "SELECT raw_name, raw_materialcode, raw_materialunit FROM raw_materials"
+      )
       .then((result) => {
         return result[0];
       })

@@ -64,11 +64,12 @@ exports.getProfitDetail = (req, res, next) => {
 exports.groupsalesProduct = async (req, res, next) => {
   const lables = [
     "PVC",
-    "PPR",
+    "PPR PIPE",
     "HDPE",
-    "UPVC fittings",
-    "PPR Fitting",
-    "Condutes",
+    "UPVC FITTINGS",
+    "PPR FITTINGS",
+    "Conduit",
+    "UPVC PIPE",
   ];
   var value = [];
   for (let keylable of lables) {

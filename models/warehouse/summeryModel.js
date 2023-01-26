@@ -118,6 +118,23 @@ module.exports = class storeRequestion {
     }
   }
 
+  static viewExpenseCurrentMonth() {
+    return db
+      .execute(
+        "SELECT * FROM expenses WHERE MONTH(date_expense) = MONTH(CURDATE()) ORDER BY date_expense ASC"
+      )
+      .then((result) => {
+        var monthlyData = [];
+        console.log(result[0]);
+
+        return result[0];
+      })
+      .catch((err) => {
+        return err;
+  
+      });
+  }
+
   static viewExpenseByMonth(id, materialType, selectedDate, selectedYear) {
     console.log("year", selectedYear);
     if (selectedDate.start == undefined && selectedYear == "") {
@@ -125,7 +142,7 @@ module.exports = class storeRequestion {
       const currentMonth = new Date().getMonth();
 
       return db
-        .execute("SELECT * FROM expenses")
+        .execute("SELECT * FROM expenses ORDER BY date_expense ASC")
         .then((result) => {
           var monthlyData = [];
           console.log(result[0]);
@@ -138,7 +155,7 @@ module.exports = class storeRequestion {
     } else if (selectedDate.start !== undefined && selectedYear == "") {
       return db
         .execute(
-          "SELECT * FROM expenses WHERE date_expense >= DAte(?) AND date_expense <= Date(?)",
+          "SELECT * FROM expenses WHERE date_expense >= DAte(?) AND date_expense <= Date(?) ORDER BY date_expense ASC",
           [selectedDate.start, selectedDate.end]
         )
         .then((result) => {
@@ -150,7 +167,7 @@ module.exports = class storeRequestion {
     } else if (selectedDate.start !== undefined && selectedYear !== "") {
       return db
         .execute(
-          "SELECT * FROM expenses WHERE date_expense >= Date(?) AND date_expense <= Date(?) AND date_expense like ?",
+          "SELECT * FROM expenses WHERE date_expense >= Date(?) AND date_expense <= Date(?) AND date_expense like ? ORDER BY date_expense ASC",
           [selectedDate.start, selectedDate.end, selectedYear + "%"]
         )
         .then((result) => {

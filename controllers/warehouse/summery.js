@@ -33,6 +33,13 @@ exports.showByIdExpense = async (req, res, next) => {
   res.status(200).json(result);
 };
 
+exports.showExpensesMontly = async (req, res, next) => {
+  console.log(req.body);
+  const result = await summeryClass.viewExpenseCurrentMonth();
+  console.log(result);
+  res.status(200).json(result);
+};
+
 exports.showByIdYear = async (req, res, next) => {
   console.log(req.body);
   const result = await summeryClass.viewSummeryYear(

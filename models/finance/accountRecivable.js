@@ -16,6 +16,20 @@ module.exports = class accountRecivable {
         return [false, err];
       });
   }
+
+  static async deleteBatchCost(data) {
+    return db
+      .execute(
+        "UPDATE cost_summery SET cost_status = 'OLD' WHERE 	cost_id = ?",
+        [data.cost_id]
+      )
+      .then((respo) => {
+        return [true, "DELETED"];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
   static async confirmGenerated(salesID) {
     return db
       .execute("UPDATE sales_order_prod SET profitGenerated = 1 WHERE id = ?", [
@@ -23,6 +37,16 @@ module.exports = class accountRecivable {
       ])
       .then((respo) => {
         return [true, "Profit Done"];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+  static async deleteOldGenerated(ProfitID) {
+    return db
+      .execute("DELETE FROM dashboard_profit WHERE id = ?", [ProfitID])
+      .then((respo) => {
+        return [true, "Profit Update"];
       })
       .catch((err) => {
         return [false, err];

@@ -104,15 +104,18 @@ module.exports = class payableModel {
       });
   }
   static addingPayable(newData, reasonID) {
+    let date = new Date(newData.new_date);
+
     const totalValue =
       parseFloat(newData.new_value) * parseFloat(newData.new_quantity);
     return db
       .execute(
-        "INSERT INTO account_payable(payable_name, payable_accountnum, payable_value, payable_person, payable_lastedate, payable_status, payable_reason, reason_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO account_payable(payable_firstdate, payable_name, payable_accountnum, payable_value, payable_person, payable_lastedate, payable_status, payable_reason, reason_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
+          date,
           newData.payable_name || "Production",
           newData.payable_account || "TIN NUM",
-         totalValue || "Production",
+          totalValue || "Production",
           newData.personId || newData.personID || "",
           newData.payable_lastedate || "NO DEADLINE",
           newData.new_remark || "",

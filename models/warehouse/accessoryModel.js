@@ -12,37 +12,37 @@ module.exports = class accessory {
       });
   }
 
-  static showBYCatagory(cat){
+  static showBYCatagory(cat) {
     return db
-    .execute("SELECT * FROM accs_materials WHERE accs_spec = '"+cat+"'")
-    .then((result) => {
-      return[true, result[0]] ;
-    })
-    .catch((err) => {
-      return [false, err];
-    });
+      .execute("SELECT * FROM accs_materials WHERE accs_spec = '" + cat + "'")
+      .then((result) => {
+        return [true, result[0]];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
   }
 
   static addAccessory(newMaterialForm) {
     const totalValue =
       parseFloat(newMaterialForm.accs_value) *
       parseFloat(newMaterialForm.accs_quantity);
+    let date = new Date(newMaterialForm.accs_date);
     return db
       .execute(
-        "INSERT INTO accs_materials(accs_name, accs_quantity, accs_description, accs_materialcode, accs_spec, accs_materialunit, accs_value, accs_referncenum, accs_remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO accs_materials(accs_name, accs_quantity, accs_description, accs_materialcode, accs_date, accs_spec, accs_materialunit, accs_value, accs_referncenum, accs_remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           newMaterialForm.accs_name,
           newMaterialForm.accs_quantity || "0",
           newMaterialForm.accs_description || "-",
           newMaterialForm.accs_materialcode,
+          date,
           newMaterialForm.accs_spec,
           newMaterialForm.accs_materialunit || "PCS",
-          totalValue || "0",
-          newMaterialForm.accs_referncenum || "-",    
+          newMaterialForm.accs_value || "0",
+          newMaterialForm.accs_referncenum || "-",
           newMaterialForm.accs_remark || "No Remark",
         ]
-
-        
       )
       .then(() => {
         return "new accessory material added";
@@ -66,21 +66,20 @@ module.exports = class accessory {
       )
       .then((result) => {
         const today = new Date();
+        let date = new Date(newMat.accs_date);
         return db
           .execute(
             "INSERT INTO summery(material_id, material_type, summery_date, stockat_hand, stock_recieved, stock_issued, department_issued, stockat_end) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
             [
               oldMat[0].id,
               "ACCS",
-              today,
+              date || today,
               oldMat[0].accs_quantity,
               newMat.accs_quantity,
               "",
               newMat.personID,
               updateQuan,
             ]
-
-
           )
           .then((res) => {
             return "summery Updated";
@@ -93,7 +92,9 @@ module.exports = class accessory {
 
   static async subAccsQty(oldMat, newMat) {
     var updateQuan;
-    if (parseFloat(oldMat[0].accs_quantity) >= parseFloat(newMat.accs_quantity)) {
+    if (
+      parseFloat(oldMat[0].accs_quantity) >= parseFloat(newMat.accs_quantity)
+    ) {
       updateQuan =
         parseFloat(oldMat[0].accs_quantity) - parseFloat(newMat.accs_quantity);
 
@@ -109,8 +110,6 @@ module.exports = class accessory {
           const today = new Date();
           return db
             .execute(
-           
-
               "INSERT INTO summery(material_id, material_type, summery_date, stockat_hand, stock_recieved, stock_issued, department_issued, stockat_end, fs_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
               [
                 oldMat[0].id,

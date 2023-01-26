@@ -7,8 +7,16 @@ exports.getMaterials = (req, res, next) => {
   });
 };
 
-exports.getMaterialsbatch = (req, res, next) => {
+exports.getMaterialsAll = (req, res, next) => {
   rawMaterial.getallMaterials().then((result) => {
+    console.log(result);
+    res.status(200).json(result);
+  });
+};
+
+
+exports.getMaterialsbatch = (req, res, next) => {
+  rawMaterial.getallMaterialsB().then((result) => {
     console.log(result);
     result.map((elem) => {
        elem.mat_quantity = "-"

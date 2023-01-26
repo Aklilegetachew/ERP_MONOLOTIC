@@ -15,7 +15,9 @@ module.exports = class ProfiteModule {
   }
   static fetchProfitAll() {
     return db
-      .execute("SELECT * FROM dashboard_profit")
+      .execute(
+        "SELECT dashboard_profit.*, sales_order_prod.* FROM dashboard_profit, sales_order_prod WHERE sales_order_prod.id = dashboard_profit.salesID ORDER BY sales_date ASC"
+      )
       .then((respo) => {
         return [true, respo[0]];
       })
@@ -23,19 +25,23 @@ module.exports = class ProfiteModule {
         return [false, err];
       });
   }
-  static expenseMonthly(data){
+  static expenseMonthly(data) {
     return db
-    .execute("SELECT SUM(total_price) AS TOTALEXP FROM expenses WHERE MONTH(date_expense) = MONTH(CURRENT_DATE()) AND YEAR(date_expense) = YEAR(CURRENT_DATE())")
-    .then((respo) => {
-      return [true, respo[0]];
-    })
-    .catch((err) => {
-      return [false, err];
-    }); 
+      .execute(
+        "SELECT SUM(total_price) AS TOTALEXP FROM expenses WHERE MONTH(date_expense) = MONTH(CURRENT_DATE()) AND YEAR(date_expense) = YEAR(CURRENT_DATE())"
+      )
+      .then((respo) => {
+        return [true, respo[0]];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
   }
   static fetchUncollected() {
     return db
-      .execute("SELECT * FROM sales_order_prod WHERE status != 'Cash'")
+      .execute(
+        "SELECT * FROM sales_order_prod WHERE status != 'Cash' ORDER BY sales_date ASC"
+      )
       .then((respo) => {
         return [true, respo[0]];
       })
@@ -70,11 +76,11 @@ module.exports = class ProfiteModule {
   }
 
   static async fetchproductsold(keyWord) {
+    console.log(keyWord);
     return await db
       .execute(
-        "SELECT SUM(total_product) AS 'Weekly_Total' FROM sales_order_prod WHERE WEEK(sales_date) = WEEK(CURDATE()) AND product_orderd LIKE '" +
-          keyWord +
-          "' "
+        "SELECT SUM(CAST(total_product AS UNSIGNED)) AS 'Weekly_Total' FROM sales_order_prod WHERE WEEK(sales_date) = WEEK(CURDATE()) AND product_orderd = ? ",
+        [keyWord]
       )
       .then((respo) => {
         console.log(respo[0]);
@@ -89,7 +95,8 @@ module.exports = class ProfiteModule {
   static async fetchProductionCost(salesID) {
     return await db
       .execute(
-        " SELECT cost_summery.*, production_cost.* FROM cost_summery, production_cost WHERE cost_summery.production_id = ? AND production_cost.production_id = ? ", [salesID,salesID]
+        " SELECT cost_summery.*, production_cost.* FROM cost_summery, production_cost WHERE cost_summery.production_id = ? AND production_cost.production_id = ? ",
+        [salesID, salesID]
       )
       .then((respo) => {
         return [true, respo[0]];
