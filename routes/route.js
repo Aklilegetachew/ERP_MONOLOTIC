@@ -149,6 +149,7 @@ router.post("/showAssetByType", assetMangment.showAllType);
 
 router.post("/addExpense", assetMangment.addExpense);
 router.post("/showExpense", assetMangment.showExpense);
+router.post("/deleteExpense", assetMangment.deleteExpense);
 
 ////////////////////////////////////////////////////////////////////////
 

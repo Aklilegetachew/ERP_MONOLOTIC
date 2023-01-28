@@ -70,11 +70,14 @@ module.exports = class salesOrder {
       });
   }
   static addSalesOrder(data) {
+    const date = new Date(data.sales_date);
+    const today = new Date();
     var IDgenerator = this.uniqueId();
     return db
       .execute(
-        "INSERT INTO sales_order(salesID, customer_name, customer_address, Tin_number, cus_total, final_product, final_color, final_materialCode, final_diameter, final_quant, final_measureunit, cus_advance, payment, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO sales_order(order_date, salesID, customer_name, customer_address, Tin_number, cus_total, final_product, final_color, final_materialCode, final_diameter, final_quant, final_measureunit, cus_advance, payment, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
+          date || today,
           data.salesID,
           data.customer_name,
           data.customer_address,

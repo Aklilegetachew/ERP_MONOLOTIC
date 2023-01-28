@@ -47,20 +47,20 @@ module.exports = class accessory {
   }
 
   static addFinishedMat(newMaterialForm) {
-    const totalValue =
-      parseFloat(newMaterialForm.finished_value) *
-      parseFloat(newMaterialForm.finished_quantity);
+    let date = new Date(newMaterialForm.fin_date);
+    const today = new Date();
     return db
       .execute(
-        "INSERT INTO finished_goods(finished_name, finished_quantity, finished_description, finished_materialcode, finished_spec, finished_materialunit, finished_value, finished_referncenum, finished_remark, finished_catag, finished_diameter, color, finished_mass) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO finished_goods(finished_date, finished_name, finished_quantity, finished_description, finished_materialcode, finished_spec, finished_materialunit, finished_value, finished_referncenum, finished_remark, finished_catag, finished_diameter, color, finished_mass) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
+          date || today,
           newMaterialForm.finished_name,
           newMaterialForm.finished_quantity || "0",
           newMaterialForm.finished_description || "-",
           newMaterialForm.finished_materialcode,
           newMaterialForm.finished_spec || "-",
           newMaterialForm.finished_materialunit || "PCS",
-          totalValue || "0",
+          newMaterialForm.finished_value || "0",
           newMaterialForm.finished_referncenum || "-",
           newMaterialForm.finished_remark || "-",
           newMaterialForm.finished_name,
@@ -174,6 +174,8 @@ module.exports = class accessory {
   }
 
   static async subQty(oldMat, newMat) {
+    console.log("Founded", oldMat);
+    console.log("New Mat", newMat);
     var updateQuan;
     if (oldMat[0].finished_quantity >= parseInt(newMat.fin_quantity)) {
       updateQuan =
@@ -204,28 +206,19 @@ module.exports = class accessory {
               [
                 oldMat[0].id,
                 "FIN",
-                today,
+                newMat.fin_date || today,
                 oldMat[0].finished_quantity,
                 "",
                 newMat.fin_quantity,
-                newMat.personID,
+                newMat.personID || newMat.fin_reqpersonid,
                 updateQuan,
                 INMassIssued,
                 INAthand,
-                newMat.fin_referncenum,
+                newMat.fin_referncenum ||
+                  newMat.FsNumber ||
+                  newMat.raw_salesId ||
+                  "",
               ]
-
-              // "INSERT INTO summery(material_id, material_type, summery_date, stockat_hand, stock_recieved, stock_issued, department_issued, stockat_end) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-              // [
-              //   oldMat[0].id,
-              //   "FIN",
-              //   today,
-              //   oldMat[0].finished_quantity,
-              //   "",
-              //   newMat.fin_quantity,
-              //   newMat.fin_requestdept,
-              //   updateQuan,
-              // ]
             )
             .then((res) => {
               return "summery_Updated";

@@ -13,10 +13,12 @@ module.exports = class salesStore {
   }
 
   static async rawMaterialRequest(materialRequested) {
+    const today = new Date();
     return await db
       .execute(
-        "INSERT INTO material_request(mat_requestname, mat_requestdept, mat_reqpersonid, mat_quantity, req_materialtype, mat_status, salesID, FsNumber, mat_materialcode, finished_diameter, finished_Color, mat_description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO material_request(mat_requestdate, mat_requestname, mat_requestdept, mat_reqpersonid, mat_quantity, req_materialtype, mat_status, salesID, FsNumber, mat_materialcode, finished_diameter, finished_Color, mat_description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
+          materialRequested.order_date || today,
           materialRequested.final_product,
           "SALES",
           "SALES",
@@ -43,8 +45,9 @@ module.exports = class salesStore {
   static async postOrder(data) {
     return await db
       .execute(
-        "INSERT INTO sales_order_prod(customer_name, customer_address, customer_tin, product_orderd, product_color, product_desc, product_spec, total_product, mou, totalCash, status, advances, salesId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO sales_order_prod(sales_date, customer_name, customer_address, customer_tin, product_orderd, product_color, product_desc, product_spec, total_product, mou, totalCash, status, advances, salesId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
+          data.order_date,
           data.customer_name,
           data.customer_address,
           data.Tin_number,

@@ -52,6 +52,16 @@ exports.showExpense = (req, res, next) => {
   });
 };
 
+exports.deleteExpense = (req, res, next) => {
+  assetManagemnt.deleteExpenseId(req.body).then((respo) => {
+    if (respo[0]) {
+      res.status(200).json(respo[1]);
+    } else {
+      res.status(400).json(respo[1]);
+    }
+  });
+};
+
 exports.showAllType = (req, res, next) => {
   assetManagemnt.showAssetsType(req.body.materialType).then((respo) => {
     if (respo[0]) {

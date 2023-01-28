@@ -25,10 +25,13 @@ module.exports = class rawMaterial {
   }
 
   static addRawMaterials(newMaterialForm) {
+    let date = new Date(newMaterialForm.raw_date);
+    const today = new Date();
     return db
       .execute(
-        "INSERT INTO raw_materials(raw_name, raw_quantity, raw_description, raw_materialcode, raw_spec, raw_materialunit, raw_value, raw_referncenum, raw_remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO raw_materials(raw_date, raw_name, raw_quantity, raw_description, raw_materialcode, raw_spec, raw_materialunit, raw_value, raw_referncenum, raw_remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
+          date || today,
           newMaterialForm.raw_name,
           newMaterialForm.raw_quantity || "0",
           newMaterialForm.raw_description || "-",
@@ -82,21 +85,19 @@ module.exports = class rawMaterial {
       parseInt(oldMat[0].raw_quantity) + parseInt(newMat.raw_quantity);
     return db
       .execute(
-        "UPDATE raw_materials SET raw_quantity ='" +
-          updateQuan +
-          "' WHERE id ='" +
-          oldMat[0].id +
-          "'"
+        "UPDATE raw_materials SET raw_quantity = ?, raw_value = ? WHERE id = ?",
+        [updateQuan, newMat.raw_value, oldMat[0].id]
       )
       .then((result) => {
         const today = new Date();
+        let date = new Date(newMat.raw_date);
         return db
           .execute(
             "INSERT INTO summery(material_id, material_type, summery_date, stockat_hand, stock_recieved, stock_issued, department_issued, stockat_end) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
             [
               oldMat[0].id,
               "RAW",
-              today,
+              date || today,
               oldMat[0].raw_quantity,
               newMat.raw_quantity,
               "",
@@ -135,7 +136,7 @@ module.exports = class rawMaterial {
               [
                 oldMat[0].id,
                 "RAW",
-                today,
+                newMat.raw_date || today,
                 oldMat[0].raw_quantity,
                 "",
                 newMat.raw_quantity,

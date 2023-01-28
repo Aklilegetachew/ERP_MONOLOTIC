@@ -162,13 +162,8 @@ module.exports = class accountRecivable {
     if (newBalance !== 0) {
       return await db
         .execute(
-          "UPDATE sales_order_prod SET advances = '" +
-            newadvance +
-            "', balance = '" +
-            newBalance +
-            "' WHERE id = '" +
-            data.ID +
-            "'"
+          "UPDATE sales_order_prod SET advances = ?, balance = ?, status = 'Advanced' WHERE id = ?",
+          [newadvance, newBalance, data.ID]
         )
         .then((respo) => {
           return [true, "COMPLETED"];
@@ -179,9 +174,7 @@ module.exports = class accountRecivable {
     } else {
       return await db
         .execute(
-          "UPDATE sales_order_prod SET status = 'Cash' WHERE id = '" +
-            data.ID +
-            "'"
+          "UPDATE sales_order_prod SET advances = ?, status = 'Cash' WHERE id = ?",[newadvance, data.ID]
         )
         .then((respo) => {
           return [true, "Updated"];

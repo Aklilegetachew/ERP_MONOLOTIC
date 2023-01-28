@@ -58,11 +58,8 @@ module.exports = class accessory {
     console.log(updateQuan);
     return db
       .execute(
-        "UPDATE accs_materials SET accs_quantity ='" +
-          updateQuan +
-          "' WHERE id ='" +
-          oldMat[0].id +
-          "'"
+        "UPDATE accs_materials SET accs_quantity = ?, accs_value = ? WHERE id = ?",
+        [updateQuan, newMat.accs_value, oldMat[0].id]
       )
       .then((result) => {
         const today = new Date();
@@ -114,7 +111,7 @@ module.exports = class accessory {
               [
                 oldMat[0].id,
                 "ACCS",
-                today,
+                newMat.accs_date || today,
                 oldMat[0].accs_quantity,
                 "",
                 newMat.accs_quantity,

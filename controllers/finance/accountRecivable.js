@@ -174,12 +174,17 @@ exports.showSalesOrderPro = async (req, res, next) => {
 };
 
 exports.showSalesOrderById = async (req, res, next) => {
-  const result = await accountRecivable.showsalesProdOrderID(req.body.ID);
-  console.log(result);
-  if (result[0]) {
-    res.status(200).json(result[1]);
+  console.log(req.body.ID);
+  if (!req.body.ID) {
+    res.status(400).json("ID Not Defined");
   } else {
-    res.status(400).json(result[1]);
+    const result = await accountRecivable.showsalesProdOrderID(req.body.ID);
+    console.log(result);
+    if (result[0]) {
+      res.status(200).json(result[1]);
+    } else {
+      res.status(400).json(result[1]);
+    }
   }
 };
 

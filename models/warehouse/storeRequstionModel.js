@@ -29,29 +29,8 @@ module.exports = class storeRequestion {
       GID,
       newData.raw_salesId
     );
-    console.log("ttttttttttttt", respo);
     return respo;
-    // .then((respo) => {
-    //   console.log("oooooo",respo)
-    //   if (respo[0]) {
-    //     return { message: "Financed", response: respo[1] };
-    //   } else {
-    //     console.log(respo[1]);
-    //     return { message: "error on finance recivable", response: respo[1] };
-    //   }
-    // });
 
-    // await finAxios
-    //   .post("/accountRecivable", {
-    //     newData,
-    //   })
-    //   .then((res) => {
-    //     console.log(res);
-    //     return true;
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
   }
 
   static acceptRecived(itemID) {
@@ -76,6 +55,7 @@ module.exports = class storeRequestion {
                   raw_prodId: result[0][0].prodID,
                   raw_salesId: result[0][0].salesID,
                   FsNumber: result[0][0].FsNumber,
+                  accs_date: result[0][0].mat_requestdate,
                 };
               } else if (result[0][0].req_materialtype == "RAW") {
                 newMatData = {
@@ -90,6 +70,7 @@ module.exports = class storeRequestion {
                   raw_salesId: result[0][0].salesID,
                   raw_materialcode: result[0][0].mat_materialcode,
                   FsNumber: result[0][0].FsNumber,
+                  raw_date: result[0][0].mat_requestdate,
                 };
               } else if (result[0][0].req_materialtype == "FIN") {
                 newMatData = {
@@ -104,6 +85,7 @@ module.exports = class storeRequestion {
                   fin_color: result[0][0].finished_Color,
                   fin_materialcode: result[0][0].mat_materialcode,
                   fin_diameter: result[0][0].finished_diameter,
+                  fin_date: result[0][0].mat_requestdate,
                 };
               }
 
@@ -176,11 +158,14 @@ module.exports = class storeRequestion {
       });
   }
 
-  static addstoreRequestionAccs(materialRequested) {
-    return db
+  static async addstoreRequestionAccs(materialRequested) {
+    const date = new Date(materialRequested.requestDate);
+    const today = new Date();
+    return await db
       .execute(
-        "INSERT INTO material_request(mat_requestname, mat_requestdept, mat_reqpersonid, mat_quantity, req_materialtype, mat_status, mat_unit, FsNumber, mat_materialcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO material_request(mat_requestdate, mat_requestname, mat_requestdept, mat_reqpersonid, mat_quantity, req_materialtype, mat_status, mat_unit, FsNumber, mat_materialcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
+          date || today,
           materialRequested.material_name,
           "Production",
           materialRequested.request_person || "",

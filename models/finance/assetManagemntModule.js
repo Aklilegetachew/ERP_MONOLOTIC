@@ -44,6 +44,16 @@ module.exports = class AssetManagment {
         return [false, err];
       });
   }
+  static deleteExpenseId(data) {
+    return db
+      .execute("DELETE FROM expenses WHERE id = ?", [data.ID])
+      .then((respo) => {
+        return [true, respo[0]];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
 
   static addAsset(dataID) {
     db.execute(
@@ -83,12 +93,11 @@ module.exports = class AssetManagment {
   static async subAssetaccs(dataID) {
     return await db
       .execute(
-        "INSERT INTO asset_mang(asset_name, asset_spec, asset_quantity, asset_desc, asset_exp, asset_status, department, personRequested, materialType)VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO asset_mang(asset_name, asset_spec, asset_quantity, asset_exp, asset_status, department, personRequested, materialType)VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
         [
           dataID.accs_name,
-          dataID.accs_spec || "specification",
+          dataID.accs_materialcode || "specification",
           dataID.accs_quantity,
-          dataID.accs_description,
           "",
           "Reqestion",
           dataID.accs_requestdept,
@@ -107,12 +116,13 @@ module.exports = class AssetManagment {
   static async subAssetraw(dataID) {
     return await db
       .execute(
-        "INSERT INTO asset_mang(asset_name, asset_spec, asset_quantity, asset_desc, asset_exp, asset_status, department, personRequested, materialType)VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO asset_mang(asset_name, asset_date, asset_spec, asset_quantity, asset_desc, asset_exp, asset_status, department, personRequested, materialType)VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           dataID.raw_name,
+          dataID.raw_date,
           dataID.raw_spec || "specification",
           dataID.raw_quantity,
-          dataID.raw_description,
+          dataID.raw_materialcode,
           "",
           "Reqestion",
           dataID.raw_requestdept,

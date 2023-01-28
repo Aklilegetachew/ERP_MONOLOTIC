@@ -71,25 +71,26 @@ exports.addNewproductionOrder = (req, res, next) => {
   });
 };
 
-exports.rawMaterialRequest = (req, res, next) => {
-  const materials = req.body[0];
-  const batchID = req.body[1];
-  const FsNumber = req.body[2];
+exports.rawMaterialRequest = async (req, res, next) => {
+
+
+  const materials = req.body;
+
   var status = false;
   console.log(materials);
-  res.status(200).json("Good");
-  materials.forEach((element) => {
-    productionModel
-      .addrawMaterialRequest(element, FsNumber, batchID)
-      .then((result) => {
-        status = result[0];
-      });
-  });
+
+  const requests = materials.map((element) =>
+    productionModel.addrawMaterialRequest(element)
+  );
+
+  const results = await Promise.all(requests);
+
+  status = results.every((result) => result[0]);
 
   if (status) {
-    res.status(200).json(result[1]);
+    res.status(200).json("Raw Material Requested");
   } else {
-    res.status(400).json(result[1]);
+    res.status(400).json("Error ON REquest");
   }
 };
 

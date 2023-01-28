@@ -141,29 +141,32 @@ module.exports = class productionModel {
       });
   }
 
-  static addrawMaterialRequest(materials, fs_number, batch) {
-    console.log(fs_number);
-    console.log(materials.raw_materialcode);
-
+  static addrawMaterialRequest(materialRequested) {
+    let date = new Date(materialRequested.mat_date);
+    const today = new Date();
     return db
       .execute(
-        "INSERT INTO rawmaterialrequest (batch_id, fsNumber, raw_name, raw_materialcode, quantity, material_unit, req_status, request_date)VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO material_request(mat_requestname, mat_requestdept, mat_reqpersonid, mat_quantity, req_materialtype, mat_requestdate, mat_status, mat_unit, FsNumber, mat_materialcode, batch_num) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
-          batch,
-          fs_number,
-          materials.new_name,
-          materials.new_materialcode,
-          materials.new_quantity,
-          materials.new_materialunit,
-          "NEW",
-          "date",
+          materialRequested.mat_requestname,
+          materialRequested.userName || "PRODUCTION",
+          materialRequested.userName || "234",
+          materialRequested.mat_quantity,
+          materialRequested.req_materialtype,
+          date || today,
+          "PENDING",
+          materialRequested.mat_unit || "",
+          materialRequested.FsNumber || "",
+          materialRequested.mat_materialcode || "",
+          materialRequested.BatchID,
         ]
       )
-      .then((respo) => {
-        return [true, "New REQUEST ADDED"];
+      .then((result) => {
+        return [true];
       })
       .catch((err) => {
-        return [false, err];
+        console.log("yhuyuyuuy", err);
+        return [false];
       });
   }
 
