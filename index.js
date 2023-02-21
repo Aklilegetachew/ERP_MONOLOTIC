@@ -10,7 +10,7 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-const port = 11000 || config.PORT;
+const port = 5000 || config.PORT;
 app.use(routes);
 
 app.listen(port, () => {
