@@ -1,6 +1,16 @@
 const db = require("../../util/db");
 
 module.exports = class ProfiteModule {
+  static async fetchUserID(data) {
+    return await db
+      .execute("SELECT * FROM users WHERE user_role = ? OR user_role = ?", [data, "Super Admin"])
+      .then((respo) => {
+        return [true, respo[0]];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
   static showlastFiveRecords() {
     return db
       .execute(

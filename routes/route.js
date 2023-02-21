@@ -42,7 +42,7 @@ router.post("/accsRequestion", requstion.addaccsrequestion);
 router.post("/showSummeryByID", summery.showById);
 router.post("/showSummeryByMonth", summery.showByIdMonth);
 router.post("/showExpenseByMonth", summery.showByIdExpense);
-router.post("/expensesMonthly",summery.showExpensesMontly)
+router.post("/expensesMonthly", summery.showExpensesMontly);
 router.post("/showSummeryByYear", summery.showByIdYear);
 router.post("/showAllByType", summery.showByType);
 
@@ -105,6 +105,7 @@ router.post("/deleteProductionOrderRow", production.deleteOrder);
 router.post("/addProductProduced", production.productFinshed);
 router.get("/showFinishedProduction", production.showFinishedProduction);
 router.post("/makeSummery", production.summeryMaker);
+router.post("/addproductFinished", production.addFinshedProduction);
 
 router.post("/addproductionGM", production.addProductiionGM);
 router.get("/showOrderGM", production.showProductionGM);
@@ -125,7 +126,7 @@ router.post("/showReasonById", accountPayable.showReasonById);
 router.get("/showProductionCost", accountRecivable.showProductionCost);
 router.post("/generateProfit", accountRecivable.generateProfit);
 router.get("/showsalesProfit", accountRecivable.showSalesProfit);
-router.post("/updateProfit", accountRecivable.updateProfit)
+router.post("/updateProfit", accountRecivable.updateProfit);
 
 // change the cash managment part updating the value
 
@@ -136,7 +137,7 @@ router.post("/completeRecibableSalesOrder", accountRecivable.makeCompelte);
 router.get("/shoesalesOrderProd", accountRecivable.showSalesOrder);
 router.get("/showsalesOrderprofit", accountRecivable.showSalesOrderPro);
 router.post("/shoesalesOrderProdById", accountRecivable.showSalesOrderById);
-router.post("/deleteCostSummery", accountRecivable.deletebatchCost)
+router.post("/deleteCostSummery", accountRecivable.deletebatchCost);
 
 router.post("/subAsset", assetMangment.subAsset);
 router.post("/addAsset", assetMangment.addAsset);
@@ -179,6 +180,17 @@ router.get("/getMonthExpense", dashboard.monthlyExpense);
 router.post("/diameterSelect", dashboard.selectDiameter);
 router.get("/colorSelect", dashboard.getLastFive);
 router.get("/nameSelect", dashboard.getLastFive);
+
+////////////////////////////////////////////////////////////////////////////////////
+
+// Generating Report
+
+router.get("/generateExcel", dashboard.getExcelFile);
+
+///////////////////////////////////////////////////////////////////////////////////
+// Notification
+
+router.post("/sendNotification", dashboard.NotifyingTG);
 
 router.get("/", Home.home);
 

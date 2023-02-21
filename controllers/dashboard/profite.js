@@ -1,4 +1,101 @@
 const profit = require("../../models/dashboard/profiteModel");
+const officegen = require("officegen");
+const fs = require("fs");
+const TelegramBot = require("node-telegram-bot-api");
+
+exports.NotifyingTG = async (req, res, next) => {
+  const token = "6194448484:AAEabUNgpsO2zdjHMvPDxOrtOymYr1Q6kS8";
+
+  // Create a bot that uses 'polling' to fetch new updates
+  const bot = new TelegramBot(token, { polling: true });
+  const message = req.body.message;
+  const toMessage = req.body.To;
+  
+
+  if (toMessage == "warehouse") {
+    const chatIds = await profit.fetchUserID("Ware House");
+
+    if (chatIds[0]) {
+      console.log(chatIds[1]);
+      var status = true;
+      var errors;
+      chatIds[1].map((eachuser) => {
+        try {
+          bot.sendMessage(eachuser.personId, message);
+        } catch (error) {
+          errors = error;
+        }
+      });
+      if (status) {
+        res.status(200).json("Notification Sent");
+      } else {
+        res.status(400).json(errors);
+      }
+    }
+  } else if (toMessage == "Production") {
+    const chatIds = await profit.fetchUserID("Production");
+
+    if (chatIds[0]) {
+      console.log(chatIds[1]);
+      var status = true;
+      var errors;
+      chatIds[1].map((eachuser) => {
+        try {
+          bot.sendMessage(eachuser.personId, message);
+        } catch (error) {
+          errors = error;
+        }
+      });
+      if (status) {
+        res.status(200).json("Notification Sent");
+      } else {
+        res.status(400).json(errors);
+      }
+    }
+  } else if (toMessage == "Sales") {
+    const chatIds = await profit.fetchUserID("Sales");
+
+    if (chatIds[0]) {
+      console.log(chatIds[1]);
+      var status = true;
+      var errors;
+      chatIds[1].map((eachuser) => {
+        try {
+          bot.sendMessage(eachuser.personId, message);
+        } catch (error) {
+          errors = error;
+        }
+      });
+      if (status) {
+        res.status(200).json("Notification Sent");
+      } else {
+        res.status(400).json(errors);
+      }
+    }
+  } else if (toMessage == "finance") {
+    const chatIds = await profit.fetchUserID("Finance");
+
+    if (chatIds[0]) {
+      console.log(chatIds[1]);
+      var status = true;
+      var errors;
+      chatIds[1].map((eachuser) => {
+        try {
+          bot.sendMessage(eachuser.personId, message);
+        } catch (error) {
+          errors = error;
+        }
+      });
+      if (status) {
+        res.status(200).json("Notification Sent");
+      } else {
+        res.status(400).json(errors);
+      }
+    }
+  } else {
+    res.status(200).json("UKNOWN USER");
+  }
+};
 
 exports.showProfit = (req, res, next) => {
   profit.fetchProfit().then((respo) => {
@@ -19,6 +116,49 @@ exports.selectDiameter = (req, res, next) => {
       res.status(400).json(respo[1]);
     }
   });
+};
+
+exports.getExcelFile = (req, res, next) => {
+  const xlsx = officegen("xlsx");
+
+  // Add data to the Excel file here...
+
+  const data = [
+    { column1: "Row 1, Column 1", column2: "Row 1, Column 2" },
+    { column1: "Row 2, Column 1", column2: "Row 2, Column 2" },
+    { column1: "Row 3, Column 1", column2: "Row 3, Column 2" },
+  ];
+
+  xlsx.on("finalize", function (written) {
+    console.log(
+      "Finished to create a spreadsheet.\nTotal bytes created: " + written
+    );
+  });
+
+  xlsx.on("error", function (err) {
+    console.log(err);
+  });
+
+  const sheet = xlsx.makeNewSheet();
+  sheet.name = "My Sheet";
+  // sheet.name('Example');
+
+  sheet.setCell("A1", "Column 1");
+  sheet.setCell("B1", "Column 2");
+
+  for (let i = 0; i < data.length; i++) {
+    const row = i + 2;
+    sheet.setCell(`A${row}`, data[i].column1);
+    sheet.setCell(`B${row}`, data[i].column2);
+  }
+
+  // Set the content type and send the file
+  res.setHeader(
+    "Content-Type",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  );
+  res.setHeader("Content-Disposition", "attachment; filename=xlsx.xlsx");
+  xlsx.generate(res);
 };
 
 exports.monthlyExpense = (req, res, next) => {

@@ -13,11 +13,69 @@ module.exports = class productionModel {
     return dateString + randomness;
   }
 
+  static async addToRecived(data) {
+    const date = new Date(data.newDate);
+    const today = new Date();
+    return await db
+      .execute(
+        "INSERT INTO new_materials(new_name, new_quantity, new_description, new_materialcode, new_materialunit, new_referncenum, new_materialtype, new_date, new_status, color, new_person) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+          data.final_product,
+          data.final_quant,
+          data.finished_diameter,
+          data.finished_materialcode,
+          data.final_measureunit,
+          data.refernceNum || "REF",
+          "FIN",
+          date || today,
+          "NEW",
+          data.final_color,
+          data.order_reciver,
+        ]
+      )
+      .then((resp) => {
+        return true;
+      })
+      .catch((err) => {
+        console.log(err);
+        return false;
+      });
+  }
+
   static updateStateProduction(data) {
     return db
       .execute("UPDATE production_order SET status = 'Finished' WHERE id = ?", [
         data.id,
       ])
+      .then((respo) => {
+        return true;
+      })
+      .catch((err) => {
+        console.log(err);
+        return false;
+      });
+  }
+
+  static async addToProduced(data) {
+    const date = new Date(data.newDate);
+    const today = new Date();
+    return await db
+      .execute(
+        "INSERT INTO produced(finished_name, finished_qty, personID, finished_time, finished_materialcode, finished_remark, finished_materialunit, mat_color, waste_quantity, waste_uom, finished_description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+          data.final_product,
+          data.final_quant,
+          data.order_reciver,
+          date || today,
+          data.finished_materialcode,
+          data.Remark,
+          data.final_measureunit,
+          data.final_color,
+          data.waste_Quantity,
+          data.waste_measureunit,
+          data.finished_diameter,
+        ]
+      )
       .then((respo) => {
         return true;
       })
@@ -361,11 +419,14 @@ module.exports = class productionModel {
 
   static completeOrder(data) {
     console.log(data);
+    const date = new Date(data.new_date);
+    const today = new Date();
 
     return db
       .execute(
-        "INSERT INTO produced(productionID, finished_name, finished_spec, finished_qty, personID, finished_description, finished_materialunit, finished_remark, finished_materialcode, mat_color, waste_quantity, waste_uom) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO produced(finished_time, productionID, finished_name, finished_spec, finished_qty, personID, finished_description, finished_materialunit, finished_remark, finished_materialcode, mat_color, waste_quantity, waste_uom) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
+          date || today,
           data.prodID,
           data.new_name,
           data.new_spec || "",

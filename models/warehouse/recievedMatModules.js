@@ -32,6 +32,7 @@ module.exports = class receivedMat {
   static addonRecived(newItem) {
     let date = new Date(newItem.new_date);
 
+    const today = new Date();
     return db
       .execute(
         "INSERT INTO new_materials(new_name, new_quantity, new_description, new_materialcode, new_spec, new_materialunit, new_value, new_referncenum, new_materialtype, new_date, new_remark, new_status,	new_person, color) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -45,7 +46,7 @@ module.exports = class receivedMat {
           newItem.new_value || "",
           newItem.new_referncenum || newItem.FSNumber || "",
           newItem.new_materialtype || "FIN",
-          date,
+          date || today,
           newItem.new_remark || "",
           newItem.new_status || "Produced",
           newItem.userName || newItem.personID || "name needed",

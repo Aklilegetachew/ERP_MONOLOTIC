@@ -17,6 +17,22 @@ exports.deleteOrder = async (req, res, next) => {
   }
 };
 
+exports.addFinshedProduction = async (req, res, next) => {
+  console.log(req.body);
+  const results = await productionModel.addToProduced(req.body);
+
+  if (results) {
+    const resu = await productionModel.addToRecived(req.body);
+    if (resu) {
+      res.status(200).json("Success!");
+    } else {
+      res.status(400).json("ERROR ON SAVING TO Recived");
+    }
+  } else {
+    res.status(400).json("ERROR ON SAVING TO PRODUCED");
+  }
+};
+
 exports.editBatch = async (req, res, next) => {
   // step 1: Adding new production order with new Status
 
@@ -72,8 +88,6 @@ exports.addNewproductionOrder = (req, res, next) => {
 };
 
 exports.rawMaterialRequest = async (req, res, next) => {
-
-
   const materials = req.body;
 
   var status = false;
@@ -176,84 +190,9 @@ exports.productFinshed = async (req, res, next) => {
       } else {
         res.status(403).json({ message: "error requesting" });
       }
-      // const rawUsed = await productionModel.fetchRawMatused(req.body.salesID);
-      // const massperFin = await productionModel.fetchFinMass(
-      //   req.body.new_name,
-      //   req.body.new_description
-      // );
-      // materialUsed = JSON.parse(rawUsed[1][0].raw_mat_needed);
-      // var totalcostofRawMaterial = 0.0;
-      // var rawmaterialTotal = 0.0;
-      // var costperOneGram = 0.0;
-      // var otherCost = 0.0;
-      // var costofoneFin = 0.0;
-      // var costofTotalOrder = 0.0;
-      // var salesProfit = 0.0;
-
-      // if (rawUsed[0]) {
-      //   for (singleBody of materialUsed) {
-      //     const respon = await productionModel.rawMaterialsdetail(singleBody);
-      //     rawWithValue.push(respon[1]);
-      //     totalcostofRawMaterial += respon[1].costPerMaterial;
-      //     rawmaterialTotal += parseFloat(respon[1].mat_quantity);
-      //     // var costPerMaterial = parseFloat(materialdatas.value) * parseFloat(materialdatas.mat_quantity)
-      //     const avedMark = await productionModel.rawMaterialscost(
-      //       respon[1],
-      //       req.body
-      //     );
-      //   }
-
-      //   const salesInfo = await productionModel.fetchSalesInfo(
-      //     req.body.salesID
-      //   );
-
-      //   costperOneGram =
-      //     (totalcostofRawMaterial) / rawmaterialTotal;
-
-      //   //// add vat if needed
-      //   otherCost = (costperOneGram * parseFloat(massperFin)) * 0.15;
-      //   costofoneFin = (costperOneGram * parseFloat(massperFin))+ otherCost;
-
-      //   costofTotalOrder = parseFloat(salesInfo.total_product) * costofoneFin;
-      //   salesProfit = parseFloat(salesInfo.totalCash) - costofTotalOrder;
-
-      //   rawWithValue.push({
-      //     totalcostofRawMaterials: totalcostofRawMaterial,
-      //     rawmaterialTotalQty: rawmaterialTotal,
-      //     costperOneGramraw: costperOneGram,
-      //     finGoodMass: massperFin,
-      //     otherCosts: otherCost,
-      //     costofoneFins: costofoneFin,
-      //     qtyorderdProduct: salesInfo.total_product,
-      //     salesTotal: salesInfo.totalCash,
-      //     profit: salesProfit,
-      //     salesId: req.body.salesID,
-      //     ProductID: req.body.prodID,
-      //   });
-
-      //   //////////////////////////////////////// DO THE POFIT from profit* dashboard profit here
-      //   const salesProfitFinance = await productionModel.saveProfitInfo(
-      //     rawWithValue
-      //   );
-
-      //   if (salesProfitFinance[0]) {
-      //     res.status(200).json({ Message: "Profit Calculated" });
-      //   } else {
-      //     res.status(400).json({ Message: salesProfitFinance[1] });
-      //   }
-      //   console.log("hell", rawWithValue);
-      // }
-
-      ///////// for now
     }
   });
 };
-
-// step 1 fetch the raw material used
-
-// step 3 calculate the price per batch
-
-// step 2 fetch the raw material value
 
 exports.startProduction = async (req, res, next) => {
   const productionStatus = req.body.status;

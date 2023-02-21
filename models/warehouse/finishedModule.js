@@ -153,7 +153,7 @@ module.exports = class accessory {
             [
               oldMat[0].id,
               "FIN",
-              today,
+              newMat.fin_date || today,
               oldMat[0].finished_quantity,
               newMat.fin_quantity,
               "",
@@ -239,12 +239,12 @@ module.exports = class accessory {
       .execute(
         "SELECT * FROM finished_goods WHERE finished_name='" +
           mat.fin_name +
-          "' AND finished_diameter='" +
+          "' AND finished_diameter ='" +
           mat.fin_diameter +
           "' AND finished_materialcode = '" +
           mat.fin_materialcode +
           "' AND color= '" +
-          mat.fin_color +
+          mat.final_color +
           "'"
       )
       .then((result) => {
