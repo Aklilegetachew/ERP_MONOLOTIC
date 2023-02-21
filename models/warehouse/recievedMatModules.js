@@ -30,23 +30,27 @@ module.exports = class receivedMat {
   }
 
   static addonRecived(newItem) {
+    let date = new Date(newItem.new_date);
+
+    const today = new Date();
     return db
       .execute(
-        "INSERT INTO new_materials(new_name, new_quantity, new_description, new_materialcode, new_spec, new_materialunit, new_value, new_referncenum, new_materialtype, new_remark, new_status,	new_person) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO new_materials(new_name, new_quantity, new_description, new_materialcode, new_spec, new_materialunit, new_value, new_referncenum, new_materialtype, new_date, new_remark, new_status,	new_person, color) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           newItem.new_name,
           newItem.new_quantity,
-          newItem.new_description,
+          newItem.new_description || newItem.new_diameter || "",
           newItem.new_materialcode,
-          newItem.new_spec,
+          newItem.new_spec || "",
           newItem.new_materialunit,
           newItem.new_value || "",
-          newItem.new_referncenum || "",
+          newItem.new_referncenum || newItem.FSNumber || "",
           newItem.new_materialtype || "FIN",
-          // newItem.new_date,
+          date || today,
           newItem.new_remark || "",
           newItem.new_status || "Produced",
-          newItem.userName || "name needed",
+          newItem.userName || newItem.personID || "name needed",
+          newItem.new_color || "",
         ]
       )
       .then(() => {
@@ -107,7 +111,7 @@ module.exports = class receivedMat {
                       accs_date: result[0][0].new_date,
                       accs_remark: result[0][0].new_remark,
                       material_type: result[0][0].new_materialtype,
-                      personID: result[0][0].new_person
+                      personID: result[0][0].new_person,
                     };
                   } else if (result[0][0].new_materialtype == "RAW") {
                     newMatData = {
@@ -122,13 +126,14 @@ module.exports = class receivedMat {
                       raw_date: result[0][0].new_date,
                       raw_remark: result[0][0].new_remark,
                       material_type: result[0][0].new_materialtype,
-                      personID: result[0][0].new_person
+                      personID: result[0][0].new_person,
                     };
                   } else if (result[0][0].new_materialtype == "FIN") {
                     newMatData = {
                       fin_name: result[0][0].new_name,
                       fin_quantity: result[0][0].new_quantity,
                       fin_description: result[0][0].new_description,
+                      fin_diameter: result[0][0].new_description,
                       fin_materialcode: result[0][0].new_materialcode,
                       fin_spec: result[0][0].new_spec,
                       fin_materialunit: result[0][0].new_materialunit,
@@ -137,7 +142,8 @@ module.exports = class receivedMat {
                       fin_date: result[0][0].new_date,
                       fin_remark: result[0][0].new_remark,
                       material_type: result[0][0].new_materialtype,
-                      personID: result[0][0].new_person
+                      personID: result[0][0].new_person,
+                      final_color: result[0][0].color,
                     };
                   }
 
@@ -149,7 +155,7 @@ module.exports = class receivedMat {
   }
 
   static declineRecived(itemId) {
-    return  db
+    return db
       .execute(
         "UPDATE new_materials SET new_status = 'DECLINED' WHERE id='" +
           itemId +

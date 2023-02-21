@@ -118,6 +118,67 @@ module.exports = class storeRequestion {
     }
   }
 
+  static viewExpenseCurrentMonth() {
+    return db
+      .execute(
+        "SELECT * FROM expenses WHERE MONTH(date_expense) = MONTH(CURDATE()) ORDER BY date_expense ASC"
+      )
+      .then((result) => {
+        var monthlyData = [];
+        console.log(result[0]);
+
+        return result[0];
+      })
+      .catch((err) => {
+        return err;
+  
+      });
+  }
+
+  static viewExpenseByMonth(id, materialType, selectedDate, selectedYear) {
+    console.log("year", selectedYear);
+    if (selectedDate.start == undefined && selectedYear == "") {
+      console.log("Hello");
+      const currentMonth = new Date().getMonth();
+
+      return db
+        .execute("SELECT * FROM expenses ORDER BY date_expense ASC")
+        .then((result) => {
+          var monthlyData = [];
+          console.log(result[0]);
+
+          return result[0];
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } else if (selectedDate.start !== undefined && selectedYear == "") {
+      return db
+        .execute(
+          "SELECT * FROM expenses WHERE date_expense >= DAte(?) AND date_expense <= Date(?) ORDER BY date_expense ASC",
+          [selectedDate.start, selectedDate.end]
+        )
+        .then((result) => {
+          return result[0];
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } else if (selectedDate.start !== undefined && selectedYear !== "") {
+      return db
+        .execute(
+          "SELECT * FROM expenses WHERE date_expense >= Date(?) AND date_expense <= Date(?) AND date_expense like ? ORDER BY date_expense ASC",
+          [selectedDate.start, selectedDate.end, selectedYear + "%"]
+        )
+        .then((result) => {
+          return result[0];
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  }
+
   static viewSummeryYear(id, materialType, selectedYear) {
     if (selectedYear == "") {
       const currentYear = new Date().getFullYear();

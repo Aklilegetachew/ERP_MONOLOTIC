@@ -39,7 +39,7 @@ module.exports = class purchaseModule {
 
   static showPurchaseRequests() {
     return db
-      .execute("SELECT * FROM purcase_requestform")
+      .execute("SELECT * FROM purcase_requestform ORDER BY request_date ASC")
       .then((result) => {
         return result[0];
       })

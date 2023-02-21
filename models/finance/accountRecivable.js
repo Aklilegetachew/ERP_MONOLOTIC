@@ -4,23 +4,185 @@ const salesAxios = require("../../midelware/salesaxios");
 const salesModle = require("../sales/salesOrder");
 
 module.exports = class accountRecivable {
+  static async getProductionCost() {
+    return db
+      .execute(
+        "SELECT production_order.*, custome_batch.raw_mat_needed, cost_summery.*, custome_batch.id AS CID FROM production_order, cost_summery, custome_batch WHERE cost_summery.cost_status = 'Approved' AND production_order.custom_batch_id = custome_batch.custom_batch_id AND production_order.custom_batch_id = cost_summery.production_id"
+      )
+      .then((respo) => {
+        return [true, respo[0]];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+
+  static async deleteBatchCost(data) {
+    return db
+      .execute(
+        "UPDATE cost_summery SET cost_status = 'OLD' WHERE 	cost_id = ?",
+        [data.cost_id]
+      )
+      .then((respo) => {
+        return [true, "DELETED"];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+  static async confirmGenerated(salesID) {
+    return db
+      .execute("UPDATE sales_order_prod SET profitGenerated = 1 WHERE id = ?", [
+        salesID,
+      ])
+      .then((respo) => {
+        return [true, "Profit Done"];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+  static async deleteOldGenerated(ProfitID) {
+    return db
+      .execute("DELETE FROM dashboard_profit WHERE id = ?", [ProfitID])
+      .then((respo) => {
+        return [true, "Profit Update"];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+  static async fetchSalesInfo(data) {
+    console.log("datas to use", data);
+    return await db
+      .execute("SELECT * FROM sales_order_prod WHERE id = ?", [data.salesID])
+      .then((respo) => {
+        return [true, respo[0][0]];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+
+  static async getsalesProfit() {
+    return await db
+      .execute(
+        "SELECT sales_order_prod.*, sales_order_prod.id AS SID, dashboard_profit.* FROM sales_order_prod, dashboard_profit WHERE sales_order_prod.id = dashboard_profit.salesID"
+      )
+      .then((respo) => {
+        return [true, respo[0]];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+
+  static async ProfitStore(salesInfo, costInfo, dataSubmited, profit) {
+    console.log("inputs", dataSubmited);
+    console.log("profit", profit);
+    console.log("salesI", salesInfo);
+    console.log("cost", costInfo);
+
+    return await db
+      .execute(
+        "INSERT INTO dashboard_profit (salesID, producedId, total_sales, profit, vat) VALUES (?, ?, ?, ?, ?)",
+        [
+          dataSubmited.salesID,
+          costInfo.production_id,
+          salesInfo.totalCash,
+          profit,
+          dataSubmited.VAT,
+        ]
+      )
+      .then((respo) => {
+        return [true, "PROFIT GENERATED"];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+  static async fetchCostSummery(data) {
+    console.log("datas to use", data);
+    return await db
+      .execute("SELECT * FROM cost_summery WHERE cost_id = ?", [data.costId])
+      .then((respo) => {
+        return [true, respo[0][0]];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+
   static uniqueId() {
     const dateString = Date.now().toString(36);
     const randomness = Math.random().toString(36).substr(2);
     return dateString + randomness;
   }
 
-  static async updateComplete(ID) {
+  static async getsalesOrder(ID) {
     return await db
-      .execute(
-        "UPDATE sales_order_prod SET status = 'Cash' WHERE id = '" + ID + "'"
-      )
+      .execute("Select * From sales_order_prod WHERE id = '" + ID + "'")
       .then((respo) => {
-        return [true, "COMPLETED"];
+        return [true, respo[0][0]];
       })
       .catch((err) => {
         return [false, err];
       });
+  }
+
+  static async updateComplete(data, salesOrder) {
+    var advance = 0.0;
+    var newBalance = 0.0;
+    var oldbalance = 0.0;
+    var newadvance = 0.0;
+    console.log(salesOrder);
+    // { remaining: '456', ID: '5' }  totalCash advances
+    if (salesOrder.status == "Advanced") {
+      advance = parseFloat(salesOrder.advances);
+      oldbalance =
+        parseFloat(salesOrder.totalCash) - parseFloat(salesOrder.advances);
+      newBalance = oldbalance - parseFloat(data.remaining);
+      newadvance = parseFloat(advance) + parseFloat(data.remaining);
+    } else if (salesOrder.status == "Credit") {
+      oldbalance =
+        parseFloat(salesOrder.totalCash) - parseFloat(salesOrder.advances);
+      newBalance = oldbalance - parseFloat(data.remaining);
+      newadvance = parseFloat(data.remaining);
+    }
+
+    console.log("Advance", advance);
+    console.log("newBalance", newBalance);
+    console.log("oldbalance", oldbalance);
+    console.log("newadvance", newadvance);
+
+    // var newBalance = 0.0;
+    // var oldbalance = 0.0;
+    // var newadvance = 0.0;
+
+    if (newBalance !== 0) {
+      return await db
+        .execute(
+          "UPDATE sales_order_prod SET advances = ?, balance = ?, status = 'Advanced' WHERE id = ?",
+          [newadvance, newBalance, data.ID]
+        )
+        .then((respo) => {
+          return [true, "COMPLETED"];
+        })
+        .catch((err) => {
+          return [false, err];
+        });
+    } else {
+      return await db
+        .execute(
+          "UPDATE sales_order_prod SET advances = ?, status = 'Cash' WHERE id = ?",[newadvance, data.ID]
+        )
+        .then((respo) => {
+          return [true, "Updated"];
+        })
+        .catch((err) => {
+          return [false, err];
+        });
+    }
   }
   static async showsalesProdOrder() {
     return await db
@@ -33,9 +195,23 @@ module.exports = class accountRecivable {
       });
   }
 
+  static async showsalesProdOrderPro() {
+    return await db
+      .execute("SELECT * FROM sales_order_prod WHERE profitGenerated = 0")
+      .then((respo) => {
+        return [true, respo[0]];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+
   static async showsalesProdOrderID(ID) {
     return await db
-      .execute("SELECT * FROM sales_order_prod WHERE id = '" + ID + "'")
+      .execute(
+        "SELECT sales_order_prod.*, sales_order_prod.id AS SID, dashboard_profit.* FROM sales_order_prod, dashboard_profit WHERE sales_order_prod.id = ? AND dashboard_profit.salesID = ?",
+        [ID, ID]
+      )
       .then((respo) => {
         return [true, respo[0]];
       })
@@ -140,7 +316,7 @@ module.exports = class accountRecivable {
         return [true, GID];
       })
       .catch((err) => {
-        console.log("errrrrrrrrrrrrrrrr", err);
+        console.log("err", err);
         return [false, err];
       });
   }

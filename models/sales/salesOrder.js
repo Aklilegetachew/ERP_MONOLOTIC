@@ -32,6 +32,8 @@ module.exports = class salesOrder {
         ]
       )
       .then((respo) => {
+        return [true, "Production order added"];
+
         return db
           .execute(
             "INSERT INTO productionordergm(final_product, final_spec, final_desc, final_quant, final_measureunit, order_reciver, final_color, final_status, salesID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -50,9 +52,10 @@ module.exports = class salesOrder {
           .then((resp) => {
             return [true, "Production order added"];
           })
-          .catch((err) => {
-            return [false, err];
-          });
+        
+      })
+      .catch((err) => {
+        return [false, err];
       });
   }
 
@@ -67,27 +70,28 @@ module.exports = class salesOrder {
       });
   }
   static addSalesOrder(data) {
+    const date = new Date(data.sales_date);
+    const today = new Date();
     var IDgenerator = this.uniqueId();
     return db
       .execute(
-        "INSERT INTO sales_order(company_name, customer_name, cus_bussinessName, cus_phoneNum, cus_email, ship_contactName, ship_address1, ship_address2, ship_city, cust_tinNumber, cust_bussinesNameTin, payment_status, paymentTotal, paymentLeft, unique_id, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ? , ?, ?, ?)",
+        "INSERT INTO sales_order(order_date, salesID, customer_name, customer_address, Tin_number, cus_total, final_product, final_color, final_materialCode, final_diameter, final_quant, final_measureunit, cus_advance, payment, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
-          data.company_name,
+          date || today,
+          data.salesID,
           data.customer_name,
-          data.cus_bussinessName,
-          data.cus_phoneNum,
-          data.cus_email || "",
-          data.ship_contactName || "",
-          data.ship_address1 || "",
-          data.ship_address2 || "",
-          data.ship_city,
-          data.Business_Tin,
-          data.Business_Name,
-          data.payment_status,
-          data.total,
-          data.leftPayable,
-          IDgenerator,
-          "PENDING",
+          data.customer_address,
+          data.Tin_number,
+          data.cus_total || "",
+          data.final_product,
+          data.final_color || "",
+          data.final_materialCode || "",
+          data.final_diameter || "",
+          data.final_quant,
+          data.final_measureunit,
+          data.cus_advance || "",
+          data.payment,
+          "NEW",
         ]
       )
       .then((resu) => {

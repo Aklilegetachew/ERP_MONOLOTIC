@@ -23,32 +23,14 @@ module.exports = class storeRequestion {
     );
     // console.log("salesInfo", salesInfo);
     const GID = await accountRecivable.addtoReasonrequ(newData);
-// console.log("gid", GID)
-    const respo = await accountRecivable
-      .addToRecivable(salesInfo[0], GID, newData.raw_salesId)
-      console.log("ttttttttttttt",respo)
-      return respo
-      // .then((respo) => {
-      //   console.log("oooooo",respo)
-      //   if (respo[0]) {
-      //     return { message: "Financed", response: respo[1] };
-      //   } else {
-      //     console.log(respo[1]);
-      //     return { message: "error on finance recivable", response: respo[1] };
-      //   }
-      // });
+    // console.log("gid", GID)
+    const respo = await accountRecivable.addToRecivable(
+      salesInfo[0],
+      GID,
+      newData.raw_salesId
+    );
+    return respo;
 
-    // await finAxios
-    //   .post("/accountRecivable", {
-    //     newData,
-    //   })
-    //   .then((res) => {
-    //     console.log(res);
-    //     return true;
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
   }
 
   static acceptRecived(itemID) {
@@ -65,13 +47,15 @@ module.exports = class storeRequestion {
               if (result[0][0].req_materialtype == "ACCS") {
                 newMatData = {
                   accs_name: result[0][0].mat_requestname,
-                  accs_description: result[0][0].mat_description,
+                  accs_materialcode: result[0][0].mat_materialcode,
                   accs_requestdept: result[0][0].mat_requestdept,
                   accs_reqpersonid: result[0][0].mat_reqpersonid,
                   accs_quantity: result[0][0].mat_quantity,
                   materialtype: result[0][0].req_materialtype,
                   raw_prodId: result[0][0].prodID,
                   raw_salesId: result[0][0].salesID,
+                  FsNumber: result[0][0].FsNumber,
+                  accs_date: result[0][0].mat_requestdate,
                 };
               } else if (result[0][0].req_materialtype == "RAW") {
                 newMatData = {
@@ -84,6 +68,9 @@ module.exports = class storeRequestion {
                   raw_spec: result[0][0].mat_spec,
                   raw_prodId: result[0][0].prodID,
                   raw_salesId: result[0][0].salesID,
+                  raw_materialcode: result[0][0].mat_materialcode,
+                  FsNumber: result[0][0].FsNumber,
+                  raw_date: result[0][0].mat_requestdate,
                 };
               } else if (result[0][0].req_materialtype == "FIN") {
                 newMatData = {
@@ -95,6 +82,10 @@ module.exports = class storeRequestion {
                   materialtype: result[0][0].req_materialtype,
                   raw_prodId: result[0][0].prodID,
                   raw_salesId: result[0][0].salesID,
+                  fin_color: result[0][0].finished_Color,
+                  fin_materialcode: result[0][0].mat_materialcode,
+                  fin_diameter: result[0][0].finished_diameter,
+                  fin_date: result[0][0].mat_requestdate,
                 };
               }
 
@@ -141,12 +132,12 @@ module.exports = class storeRequestion {
   static addstoreRequestion(materialRequested) {
     return db
       .execute(
-        "INSERT INTO material_request(mat_requestname, mat_requestdept, mat_reqpersonid, mat_description, mat_quantity, req_materialtype, mat_status, salesID, prodID, mat_unit, mat_spec) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO material_request(mat_requestname, mat_requestdept, mat_reqpersonid, mat_description, mat_quantity, req_materialtype, mat_status, salesID, prodID, mat_unit, mat_spec, FsNumber, mat_materialcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           materialRequested.mat_requestname,
           materialRequested.mat_requestdept,
           materialRequested.mat_reqpersonid || "234",
-          materialRequested.mat_description,
+          materialRequested.mat_description || "",
           materialRequested.mat_quantity,
           materialRequested.req_materialtype,
           "PENDING",
@@ -154,6 +145,8 @@ module.exports = class storeRequestion {
           materialRequested.ProductionId || " ",
           materialRequested.mat_unit || "",
           materialRequested.mat_spec || "",
+          materialRequested.FsNumber || "",
+          materialRequested.mat_materialcode || "",
         ]
       )
       .then((result) => {
@@ -161,6 +154,33 @@ module.exports = class storeRequestion {
       })
       .catch((err) => {
         console.log("yhuyuyuuy", err);
+        return false;
+      });
+  }
+
+  static async addstoreRequestionAccs(materialRequested) {
+    const date = new Date(materialRequested.requestDate);
+    const today = new Date();
+    return await db
+      .execute(
+        "INSERT INTO material_request(mat_requestdate, mat_requestname, mat_requestdept, mat_reqpersonid, mat_quantity, req_materialtype, mat_status, mat_unit, FsNumber, mat_materialcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+          date || today,
+          materialRequested.material_name,
+          "Production",
+          materialRequested.request_person || "",
+          materialRequested.materialQty,
+          "ACCS",
+          "PENDING",
+          materialRequested.measuring_unit || " ",
+          materialRequested.FS_number || " ",
+          materialRequested.material_code || "",
+        ]
+      )
+      .then((result) => {
+        return true;
+      })
+      .catch((err) => {
         return false;
       });
   }

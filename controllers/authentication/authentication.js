@@ -33,7 +33,7 @@ exports.signup = (req, res) => {
                 },
                 "PROPLAST"
               );
-              req.session.jwt = userJwt;
+              // req.session.jwt = userJwt;
               res.status(200).json({ message: "signedup" });
             });
           });

@@ -3,15 +3,128 @@ const { response } = require("express");
 const productionModel = require("../../models/Production/productionModel");
 const { setTimeout } = require("timers/promises");
 
-exports.addNewproductionOrder = (req, res, next) => {
+exports.deleteOrder = async (req, res, next) => {
+  const result = await productionModel.deleteOrderGM(req.body);
+  if (result) {
+    const result2 = await productionModel.deleteOrder(req.body);
+    if (result2) {
+      res.status(200).json({ message: "deleted" });
+    } else {
+      res.status(400).json({ message: "Production order deleted" });
+    }
+  } else {
+    res.status(400).json({ message: "GM Production order deleted" });
+  }
+};
+
+exports.addFinshedProduction = async (req, res, next) => {
   console.log(req.body);
-  productionModel.addproductionOrder(req.body).then((result) => {
+  const results = await productionModel.addToProduced(req.body);
+
+  if (results) {
+    const resu = await productionModel.addToRecived(req.body);
+    if (resu) {
+      res.status(200).json("Success!");
+    } else {
+      res.status(400).json("ERROR ON SAVING TO Recived");
+    }
+  } else {
+    res.status(400).json("ERROR ON SAVING TO PRODUCED");
+  }
+};
+
+exports.editBatch = async (req, res, next) => {
+  // step 1: Adding new production order with new Status
+
+  productionModel.updateStateProduction(req.body).then(async (result) => {
+    if (result) {
+      res.status(200).json("Batch Edited");
+    } else {
+      res.status(400).json("error");
+    }
+  });
+
+  // step 2:  add production batch formula
+
+  // step 3: production order cost
+
+  // step 4: old production order into Finished status
+};
+
+exports.addNewproductionOrder = (req, res, next) => {
+  console.log("Incomming data", req.body);
+  productionModel.addproductionOrder(req.body).then(async (result) => {
+    if (result[0]) {
+      const ChangeStatus = await productionModel.GMStatus(req.body);
+
+      const makeBatchCosts = await productionModel.makeBatchCost(result[1]);
+      const filteredData = makeBatchCosts.filter((d) => d.mat_quantity !== "-");
+
+      const costCalculated = await productionModel.calculateCost(
+        filteredData,
+        result[1] || "",
+        req.body.FS_NUMBER
+      );
+
+      // costCalculated returns [totalperone, totalValue, totalMass]
+
+      const massperFin = await productionModel.fetchFinMass(
+        req.body.fin_product,
+        req.body.finished_materialcode,
+        req.body.final_color,
+        req.body.finished_diameter
+      );
+      const costSummery = await productionModel.saveCostDetail(
+        costCalculated,
+        massperFin,
+        result[1]
+      );
+
+      res.status(200).json(costSummery[1]);
+    } else {
+      res.status(400).json(result[1]);
+    }
+  });
+};
+
+exports.rawMaterialRequest = async (req, res, next) => {
+  const materials = req.body;
+
+  var status = false;
+  console.log(materials);
+
+  const requests = materials.map((element) =>
+    productionModel.addrawMaterialRequest(element)
+  );
+
+  const results = await Promise.all(requests);
+
+  status = results.every((result) => result[0]);
+
+  if (status) {
+    res.status(200).json("Raw Material Requested");
+  } else {
+    res.status(400).json("Error ON REquest");
+  }
+};
+
+exports.showrawMaterialRequest = (req, res, next) => {
+  productionModel.showrawMaterialRequest().then((result) => {
     if (result[0]) {
       res.status(200).json(result[1]);
     } else {
       res.status(400).json(result[1]);
     }
   });
+};
+
+exports.resporawMaterialRequest = (req, res, next) => {
+  const status = req.status;
+  const id = request.id;
+
+  if (status == "ACCEPT") {
+  } else {
+  }
 };
 
 exports.showProductionGM = (req, res, next) => {
@@ -68,85 +181,18 @@ exports.productFinshed = async (req, res, next) => {
     if (result[0] == false) {
       res.status(403).json({ message: "error requesting" });
     } else {
-      // const respo = await productionModel.sendtoWareHouse(req.body);
-      // const resu = await productionModel.makeFinished(req.body);
-      const rawUsed = await productionModel.fetchRawMatused(req.body.salesID);
-      const massperFin = await productionModel.fetchFinMass(
-        req.body.new_name,
-        req.body.new_description
-      );
-      materialUsed = JSON.parse(rawUsed[1][0].raw_mat_needed);
-      var totalcostofRawMaterial = 0.0;
-      var rawmaterialTotal = 0.0;
-      var costperOneGram = 0.0;
-      var otherCost = 0.0;
-      var costofoneFin = 0.0;
-      var costofTotalOrder = 0.0;
-      var salesProfit = 0.0;
+      const respo = await productionModel.sendtoWareHouse(req.body);
 
-      if (rawUsed[0]) {
-        for (singleBody of materialUsed) {
-          const respon = await productionModel.rawMaterialsdetail(singleBody);
-          rawWithValue.push(respon[1]);
-          totalcostofRawMaterial += respon[1].costPerMaterial;
-          rawmaterialTotal += parseFloat(respon[1].mat_quantity);
-          // var costPerMaterial = parseFloat(materialdatas.value) * parseFloat(materialdatas.mat_quantity)
-          const avedMark = await productionModel.rawMaterialscost(
-            respon[1],
-            req.body
-          );
-        }
-
-        const salesInfo = await productionModel.fetchSalesInfo(
-          req.body.salesID
-        );
-        
-        costperOneGram =
-          (totalcostofRawMaterial) / rawmaterialTotal;
-
-        //// add vat if needed
-        otherCost = (costperOneGram * parseFloat(massperFin)) * 0.15;
-        costofoneFin = (costperOneGram * parseFloat(massperFin))+ otherCost;
-        
-
-        costofTotalOrder = parseFloat(salesInfo.total_product) * costofoneFin;
-        salesProfit = parseFloat(salesInfo.totalCash) - costofTotalOrder;
-
-        rawWithValue.push({
-          totalcostofRawMaterials: totalcostofRawMaterial,
-          rawmaterialTotalQty: rawmaterialTotal,
-          costperOneGramraw: costperOneGram,
-          finGoodMass: massperFin,
-          otherCosts: otherCost,
-          costofoneFins: costofoneFin,
-          qtyorderdProduct: salesInfo.total_product,
-          salesTotal: salesInfo.totalCash,
-          profit: salesProfit,
-          salesId: req.body.salesID,
-          ProductID: req.body.prodID,
-        });
-
-        //////////////////////////////////////// DO THE POFIT from profit* dashboard profit here
-        const salesProfitFinance = await productionModel.saveProfitInfo(
-          rawWithValue
-        );
-
-        if (salesProfitFinance[0]) {
-          res.status(200).json({ Message: "Profit Calculated" });
-        } else {
-          res.status(400).json({ Message: salesProfitFinance[1] });
-        }
-        console.log("hell", rawWithValue);
+      const resu = await productionModel.makeFinished(req.body);
+      const BatchNum = await productionModel.UpdateBatchNumber(req.body);
+      if (BatchNum) {
+        res.status(200).json({ message: "submitted Sucessfully " });
+      } else {
+        res.status(403).json({ message: "error requesting" });
       }
     }
   });
 };
-
-// step 1 fetch the raw material used
-
-// step 3 calculate the price per batch
-
-// step 2 fetch the raw material value
 
 exports.startProduction = async (req, res, next) => {
   const productionStatus = req.body.status;
@@ -157,20 +203,17 @@ exports.startProduction = async (req, res, next) => {
     // select the order
 
     const selectedResult = await productionModel.selectOrder(productionId);
-
     // select and send the raw material to warehouse
     if (selectedResult[0]) {
-      const resultRawmaterial = await productionModel.makeRawMatRequest(
-        selectedResult[1],
-        productionId,
-        personId
-      );
-
-      console.log(resultRawmaterial);
-      if (resultRawmaterial) {
+      if (selectedResult[0]) {
         const respoStatus = await productionModel.statusStarted(productionId);
-
-        if (respoStatus[0]) {
+        const approvedBatch = await productionModel.AprovePMSubmit(
+          selectedResult[1][0]
+        );
+        const AproveBatchCost = await productionModel.AproveBatchCost(
+          selectedResult[1][0]
+        );
+        if (AproveBatchCost) {
           res.status(200).json({ message: "Started !" });
         } else {
           res.status(428).json({ message: "update status error" });

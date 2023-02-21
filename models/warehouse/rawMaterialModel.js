@@ -11,23 +11,36 @@ module.exports = class rawMaterial {
         return err;
       });
   }
-
-  static addRawMaterials(newMaterialForm) {
-
+  static getallMaterialsB() {
     return db
       .execute(
-        "INSERT INTO raw_materials(raw_name, raw_quantity, raw_description, raw_materialcode, raw_spec, raw_materialunit, raw_value, raw_referncenum, raw_date, raw_remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "SELECT raw_name, raw_materialcode, raw_materialunit FROM raw_materials"
+      )
+      .then((result) => {
+        return result[0];
+      })
+      .catch((err) => {
+        return err;
+      });
+  }
+
+  static addRawMaterials(newMaterialForm) {
+    let date = new Date(newMaterialForm.raw_date);
+    const today = new Date();
+    return db
+      .execute(
+        "INSERT INTO raw_materials(raw_date, raw_name, raw_quantity, raw_description, raw_materialcode, raw_spec, raw_materialunit, raw_value, raw_referncenum, raw_remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
+          date || today,
           newMaterialForm.raw_name,
-          newMaterialForm.raw_quantity,
-          newMaterialForm.raw_description,
+          newMaterialForm.raw_quantity || "0",
+          newMaterialForm.raw_description || "-",
           newMaterialForm.raw_materialcode,
-          newMaterialForm.raw_spec,
-          newMaterialForm.raw_materialunit,
-          newMaterialForm.raw_value,
-          newMaterialForm.raw_referncenum,
-          newMaterialForm.raw_date,
-          newMaterialForm.raw_remark,
+          newMaterialForm.raw_spec || "-",
+          newMaterialForm.raw_materialunit || "-",
+          newMaterialForm.raw_value || "0",
+          newMaterialForm.raw_referncenum || "",
+          newMaterialForm.raw_remark || "-",
         ]
       )
       .then(() => {
@@ -54,10 +67,8 @@ module.exports = class rawMaterial {
     console.log(mat);
     return db
       .execute(
-        "SELECT * FROM raw_materials WHERE raw_name='" +
-          newName +
-          "' AND raw_description='" +
-          mat.raw_description +
+        "SELECT * FROM raw_materials WHERE raw_materialcode='" +
+          mat.raw_materialcode +
           "'"
       )
       .then((result) => {
@@ -74,21 +85,19 @@ module.exports = class rawMaterial {
       parseInt(oldMat[0].raw_quantity) + parseInt(newMat.raw_quantity);
     return db
       .execute(
-        "UPDATE raw_materials SET raw_quantity ='" +
-          updateQuan +
-          "' WHERE id ='" +
-          oldMat[0].id +
-          "'"
+        "UPDATE raw_materials SET raw_quantity = ?, raw_value = ? WHERE id = ?",
+        [updateQuan, newMat.raw_value, oldMat[0].id]
       )
       .then((result) => {
         const today = new Date();
+        let date = new Date(newMat.raw_date);
         return db
           .execute(
             "INSERT INTO summery(material_id, material_type, summery_date, stockat_hand, stock_recieved, stock_issued, department_issued, stockat_end) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
             [
               oldMat[0].id,
               "RAW",
-              today,
+              date || today,
               oldMat[0].raw_quantity,
               newMat.raw_quantity,
               "",
@@ -106,56 +115,10 @@ module.exports = class rawMaterial {
   }
 
   static async subQty(oldMat, newMat) {
-    // var updateQuan;
-    // if (oldMat[0].raw_quantity >= parseFloat(newMat.raw_quantity)) {
-    //   updateQuan =
-    //   parseFloat(oldMat[0].raw_quantity) - parseFloat(newMat.raw_quantity);
-    //   var newValue =
-    //     parseFloat(oldMat[0].raw_value) -
-    //     parseFloat(newMat.raw_quantity) * parseFloat(oldMat[0].raw_value);
-    //   console.log("new quantity", updateQuan);
-    //   console.log("new values", oldMat[0].raw_name);
-
-    //   return await  db
-    //     .execute(
-    //       "UPDATE raw_materials SET raw_quantity = '200' AND raw_value ='" +
-    //         300 +
-    //         "' WHERE id ='" +
-    //         oldMat[0].id +
-    //         "'"
-    //     )
-    //     .then((result) => {
-    //       const today = new Date()
-
-    //       return db
-    //         .execute(
-    //           "INSERT INTO summery(material_id, material_type, summery_date, stockat_hand, stock_recieved, stock_issued, department_issued, stockat_end) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-    //           [
-    //             oldMat[0].id,
-    //             "RAW",
-    //             today,
-    //             oldMat[0].raw_quantity,
-    //             "",
-    //             newMat.raw_quantity,
-    //             newMat.raw_requestdept,
-    //             updateQuan,
-    //           ]
-    //         )
-    //         .then((res) => {
-    //           return "summery Updated";
-    //         });
-    //     })
-    //     .catch((e) => {
-    //       console.log(e);
-    //     });
-    // } else {
-    //   return "Low in stock";
-    // }
-
     var updateQuan;
-    if (oldMat[0].raw_quantity >= parseInt(newMat.raw_quantity)) {
+    if (oldMat[0].raw_quantity >= parseFloat(newMat.raw_quantity)) {
       updateQuan =
-        parseInt(oldMat[0].raw_quantity) - parseInt(newMat.raw_quantity);
+        parseFloat(oldMat[0].raw_quantity) - parseFloat(newMat.raw_quantity);
 
       return db
         .execute(
@@ -169,16 +132,17 @@ module.exports = class rawMaterial {
           const today = new Date();
           return db
             .execute(
-              "INSERT INTO summery(material_id, material_type, summery_date, stockat_hand, stock_recieved, stock_issued, department_issued, stockat_end) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+              "INSERT INTO summery(material_id, material_type, summery_date, stockat_hand, stock_recieved, stock_issued, department_issued, stockat_end, fs_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
               [
                 oldMat[0].id,
                 "RAW",
-                today,
+                newMat.raw_date || today,
                 oldMat[0].raw_quantity,
                 "",
                 newMat.raw_quantity,
                 newMat.raw_requestdept,
                 updateQuan,
+                newMat.FsNumber,
               ]
             )
             .then((res) => {

@@ -12,24 +12,36 @@ module.exports = class accessory {
       });
   }
 
+  static showBYCatagory(cat) {
+    return db
+      .execute("SELECT * FROM accs_materials WHERE accs_spec = '" + cat + "'")
+      .then((result) => {
+        return [true, result[0]];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+
   static addAccessory(newMaterialForm) {
     const totalValue =
       parseFloat(newMaterialForm.accs_value) *
       parseFloat(newMaterialForm.accs_quantity);
+    let date = new Date(newMaterialForm.accs_date);
     return db
       .execute(
-        "INSERT INTO accs_materials(accs_name, accs_quantity, accs_description, accs_materialcode, accs_spec, accs_materialunit, accs_value, accs_referncenum, accs_date, accs_remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO accs_materials(accs_name, accs_quantity, accs_description, accs_materialcode, accs_date, accs_spec, accs_materialunit, accs_value, accs_referncenum, accs_remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           newMaterialForm.accs_name,
-          newMaterialForm.accs_quantity,
-          newMaterialForm.accs_description,
+          newMaterialForm.accs_quantity || "0",
+          newMaterialForm.accs_description || "-",
           newMaterialForm.accs_materialcode,
+          date,
           newMaterialForm.accs_spec,
-          newMaterialForm.accs_materialunit,
-          totalValue,
-          newMaterialForm.accs_referncenum,
-          newMaterialForm.accs_date,
-          newMaterialForm.accs_remark,
+          newMaterialForm.accs_materialunit || "PCS",
+          newMaterialForm.accs_value || "0",
+          newMaterialForm.accs_referncenum || "-",
+          newMaterialForm.accs_remark || "No Remark",
         ]
       )
       .then(() => {
@@ -46,21 +58,19 @@ module.exports = class accessory {
     console.log(updateQuan);
     return db
       .execute(
-        "UPDATE accs_materials SET accs_quantity ='" +
-          updateQuan +
-          "' WHERE id ='" +
-          oldMat[0].id +
-          "'"
+        "UPDATE accs_materials SET accs_quantity = ?, accs_value = ? WHERE id = ?",
+        [updateQuan, newMat.accs_value, oldMat[0].id]
       )
       .then((result) => {
         const today = new Date();
+        let date = new Date(newMat.accs_date);
         return db
           .execute(
             "INSERT INTO summery(material_id, material_type, summery_date, stockat_hand, stock_recieved, stock_issued, department_issued, stockat_end) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
             [
               oldMat[0].id,
               "ACCS",
-              today,
+              date || today,
               oldMat[0].accs_quantity,
               newMat.accs_quantity,
               "",
@@ -79,9 +89,11 @@ module.exports = class accessory {
 
   static async subAccsQty(oldMat, newMat) {
     var updateQuan;
-    if (oldMat[0].accs_quantity >= parseInt(newMat.accs_quantity)) {
+    if (
+      parseFloat(oldMat[0].accs_quantity) >= parseFloat(newMat.accs_quantity)
+    ) {
       updateQuan =
-        parseInt(oldMat[0].accs_quantity) - parseInt(newMat.accs_quantity);
+        parseFloat(oldMat[0].accs_quantity) - parseFloat(newMat.accs_quantity);
 
       return await db
         .execute(
@@ -95,16 +107,17 @@ module.exports = class accessory {
           const today = new Date();
           return db
             .execute(
-              "INSERT INTO summery(material_id, material_type, summery_date, stockat_hand, stock_recieved, stock_issued, department_issued, stockat_end) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+              "INSERT INTO summery(material_id, material_type, summery_date, stockat_hand, stock_recieved, stock_issued, department_issued, stockat_end, fs_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
               [
                 oldMat[0].id,
                 "ACCS",
-                today,
+                newMat.accs_date || today,
                 oldMat[0].accs_quantity,
                 "",
                 newMat.accs_quantity,
                 newMat.accs_requestdept,
                 updateQuan,
+                newMat.FsNumber,
               ]
             )
             .then((res) => {
@@ -124,8 +137,8 @@ module.exports = class accessory {
       .execute(
         "SELECT * FROM accs_materials WHERE accs_name='" +
           newName +
-          "' AND accs_description='" +
-          mat.accs_description +
+          "'AND	accs_materialcode='" +
+          mat.accs_materialcode +
           "'"
       )
       .then((result) => {

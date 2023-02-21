@@ -32,3 +32,20 @@ exports.makeSales = (req, res, then) => {
     res.status(200).json({ message: "Item Hold" });
   }
 };
+
+exports.AcceptSales = async (req, res, then) => {
+  console.log(req.body);
+  const respo = await salesStore.accptSales(req.body.ID);
+
+  const getOrder = await salesStore.getsalesbyID(req.body.ID);
+
+  const gmakeordertosales = await salesStore.postOrder(getOrder[0]);
+
+  const rawmatRequest = await salesStore.rawMaterialRequest(getOrder[0]);
+
+  if (respo == false || gmakeordertosales == false || rawmatRequest == false) {
+    res.status(400).json({ message: "something went wrong" });
+  } else {
+    res.status(200).json({ message: "sales Accepted" });
+  }
+};

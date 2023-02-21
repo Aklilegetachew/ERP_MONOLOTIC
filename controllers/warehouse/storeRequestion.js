@@ -28,7 +28,7 @@ exports.responseStoreReq = (req, res, next) => {
             .then(async (found) => {
               if (found[0]) {
                 const response = await accsMat.subAccsQty(found[1], result);
-                if (response == +"summery_Updated") {
+                if (response == "summery_Updated") {
                   storeRequestion.financeSubAsset(result, "ACCS");
                   storeRequestion.makeAccept(singBody.id);
                   res.status(200).json({
@@ -83,10 +83,10 @@ exports.responseStoreReq = (req, res, next) => {
                 const response = await finMat.subQty(found[1], result);
                 // console.log(response);
                 if (response === "summery_Updated") {
-                  const fromFinanac = await storeRequestion.financeRecevable(
-                    result
-                  );
-                  console.log("ppppp", fromFinanac);
+                  // const fromFinanac = await storeRequestion.financeRecevable(
+                  //   result
+                  // );
+                  // console.log("ppppp", fromFinanac);
                   storeRequestion.makeAccept(singBody.id);
                   res.status(200).json({
                     message: response,
@@ -134,4 +134,15 @@ exports.addrequestion = (req, res, next) => {
   } else {
     res.status(400).json("STORE REQUEST ERROR");
   }
+};
+
+exports.addaccsrequestion = (req, res, next) => {
+  storeRequestion.addstoreRequestionAccs(req.body).then((result) => {
+    if (result == false) {
+      res.status(400).json("STORE REQUEST ERROR");
+    }else
+    {
+      res.status(200).json("STORE REQUEST ADDED");
+    }
+  });
 };
