@@ -42,6 +42,36 @@ module.exports = class salesStore {
       });
   }
 
+  static async finishedRequest(materialRequested) {
+    const today = new Date();
+    return await db
+      .execute(
+        "INSERT INTO material_request(mat_requestdate, mat_requestname, mat_requestdept, mat_reqpersonid, mat_quantity, req_materialtype, mat_status, salesID, FsNumber, mat_materialcode, finished_diameter, finished_Color, mat_description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+          materialRequested.order_date || today,
+          materialRequested.final_product,
+          "SALES",
+          materialRequested.order_reciver,
+          materialRequested.final_quant || "",
+          "FIN",
+          "PENDING",
+          materialRequested.salesID || " ",
+          materialRequested.refernceNum || " ",
+          materialRequested.finished_materialcode || "",
+          materialRequested.finished_diameter,
+          materialRequested.final_color,
+          materialRequested.finished_diameter,
+        ]
+      )
+      .then((result) => {
+        return true;
+      })
+      .catch((err) => {
+        console.log("err", err);
+        return false;
+      });
+  }
+
   static async postOrder(data) {
     return await db
       .execute(
