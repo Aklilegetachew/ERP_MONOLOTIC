@@ -72,6 +72,7 @@ router.get("/showAcceptedRequestions", requestForm.showStatus);
 router.post("/makeSale", storeRelease.makeSales);
 router.post("/makeComplete", storeRelease.makeComplete);
 router.post("/acceptSalesOrder", storeRelease.AcceptSales);
+router.post("/finishedgoodRequestion", storeRelease.requestFinishedGood);
 
 router.post("/confirmStoreRelease", storeRelease.confirmRelease);
 

@@ -49,3 +49,14 @@ exports.AcceptSales = async (req, res, then) => {
     res.status(200).json({ message: "sales Accepted" });
   }
 };
+
+exports.requestFinishedGood = async (req, res, then) => {
+  console.log(req.body);
+  const rawmatRequest = await salesStore.finishedRequest(req.body);
+
+  if (rawmatRequest == false) {
+    res.status(400).json({ message: "something went wrong" });
+  } else {
+    res.status(200).json({ message: "sales Accepted" });
+  }
+};

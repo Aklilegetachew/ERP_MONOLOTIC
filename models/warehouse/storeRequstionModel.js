@@ -136,7 +136,7 @@ module.exports = class storeRequestion {
         [
           materialRequested.mat_requestname,
           materialRequested.mat_requestdept,
-          materialRequested.mat_reqpersonid || "234",
+          materialRequested.mat_reqpersonid || "",
           materialRequested.mat_description || "",
           materialRequested.mat_quantity,
           materialRequested.req_materialtype,
