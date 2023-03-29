@@ -85,13 +85,7 @@ module.exports = class receivedMat {
         if (result[0][0].new_status == "ACCEPTED") {
           return "ALREADY CONFIRMED";
         } else {
-          return db
-            .execute(
-              "UPDATE new_materials SET new_status = 'ACCEPTED' WHERE id='" +
-                itemID +
-                "'"
-            )
-            .then((result) => {
+      
               return db
                 .execute(
                   "SELECT * FROM new_materials WHERE id='" + itemID + "'"
@@ -149,7 +143,7 @@ module.exports = class receivedMat {
 
                   return newMatData;
                 });
-            });
+        
         }
       });
   }

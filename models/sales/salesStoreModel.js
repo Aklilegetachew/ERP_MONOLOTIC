@@ -43,24 +43,27 @@ module.exports = class salesStore {
   }
 
   static async finishedRequest(materialRequested) {
+    const date = new Date(materialRequested.order_date);
+
     const today = new Date();
     return await db
       .execute(
-        "INSERT INTO material_request(mat_requestdate, mat_requestname, mat_requestdept, mat_reqpersonid, mat_quantity, req_materialtype, mat_status, salesID, FsNumber, mat_materialcode, finished_diameter, finished_Color, mat_description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO material_request(mat_requestdate, mat_requestname, mat_requestdept, mat_reqpersonid, mat_quantity, req_materialtype, mat_status, salesID, FsNumber, mat_materialcode, finished_diameter, finished_Color, mat_description, 	mat_unit) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
-          materialRequested.order_date || today,
+          date || today,
           materialRequested.final_product,
           "SALES",
           materialRequested.order_reciver,
           materialRequested.final_quant || "",
           "FIN",
           "PENDING",
-          materialRequested.salesID || " ",
+          materialRequested.salesID || materialRequested.refernceNum || "",
           materialRequested.refernceNum || " ",
           materialRequested.finished_materialcode || "",
           materialRequested.finished_diameter,
           materialRequested.final_color,
           materialRequested.finished_diameter,
+          materialRequested.final_measureunit,
         ]
       )
       .then((result) => {
@@ -73,9 +76,17 @@ module.exports = class salesStore {
   }
 
   static async postOrder(data) {
+    var balance = 0.0;
+    if (data.payment == "Advanced") {
+      balance = parseFloat(data.cus_total) - parseFloat(data.cus_advance);
+    } else if (data.payment == "Credit") {
+      balance = 0;
+    } else {
+      balance = data.cus_total;
+    }
     return await db
       .execute(
-        "INSERT INTO sales_order_prod(sales_date, customer_name, customer_address, customer_tin, product_orderd, product_color, product_desc, product_spec, total_product, mou, totalCash, status, advances, salesId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO sales_order_prod(sales_date, customer_name, customer_address, customer_tin, product_orderd, product_color, product_desc, product_spec, total_product, mou, totalCash, status, advances, salesId, balance) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           data.order_date,
           data.customer_name,
@@ -91,6 +102,7 @@ module.exports = class salesStore {
           data.payment,
           data.cus_advance || "",
           data.salesID,
+          balance
         ]
       )
       .then((respo) => {

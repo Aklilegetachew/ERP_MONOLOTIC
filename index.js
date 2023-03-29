@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 //<<<<<<< HEAD
 const port = 5000 || config.PORT;
 //=======
-//const port = 12000 || config.PORT;
+// const port = 12000 || config.PORT;
 //>>>>>>> 42dceaa8b3c36e2b06fabf96207a2a5573c13f50
 app.use(routes);
 

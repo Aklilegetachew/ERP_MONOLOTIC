@@ -44,8 +44,11 @@ exports.acceptPurchased = async (req, res, next) => {
             .then((found) => {
               if (found[0]) {
                 accsMat.addAccsQty(found[1], result);
+                accsMat.makeAcceptStatus(singleData.id);
               } else {
-                accsMat.addAccessory(result);
+                res.status(400).json("No material Found");
+
+                // accsMat.addAccessory(result);
               }
             });
         } else if (result.material_type == "RAW") {
@@ -54,8 +57,11 @@ exports.acceptPurchased = async (req, res, next) => {
             .then((found) => {
               if (found[0]) {
                 rawMat.addQty(found[1], result);
+                accsMat.makeAcceptStatus(singleData.id);
               } else {
-                rawMat.addRawMaterials(result);
+                res.status(400).json("No material Found");
+
+                // rawMat.addRawMaterials(result);
               }
             });
         } else if (result.material_type == "FIN") {
@@ -65,8 +71,11 @@ exports.acceptPurchased = async (req, res, next) => {
               console.log("respo", found);
               if (found[0]) {
                 finMat.addQty(found[1], result);
+                accsMat.makeAcceptStatus(singleData.id);
               } else {
-                finMat.addFinishedMat(result);
+                res.status(400).json("No material Found");
+
+                // finMat.addFinishedMat(result);
               }
             });
         }

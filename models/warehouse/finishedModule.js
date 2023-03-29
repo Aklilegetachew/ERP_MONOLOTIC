@@ -244,7 +244,7 @@ module.exports = class accessory {
           "' AND finished_materialcode = '" +
           mat.fin_materialcode +
           "' AND color= '" +
-          mat.final_color +
+          mat.fin_color +
           "'"
       )
       .then((result) => {

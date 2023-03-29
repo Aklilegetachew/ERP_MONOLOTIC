@@ -87,6 +87,21 @@ module.exports = class accessory {
       });
   }
 
+  static async makeAcceptStatus(itemID) {
+    return await db
+      .execute(
+        "UPDATE new_materials SET new_status = 'ACCEPTED' WHERE id='" +
+          itemID +
+          "'"
+      )
+      .then((result) => {
+        return true;
+      })
+      .catch((err) => {
+        return false;
+      });
+  }
+
   static async subAccsQty(oldMat, newMat) {
     var updateQuan;
     if (
