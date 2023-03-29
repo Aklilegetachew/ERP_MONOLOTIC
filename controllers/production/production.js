@@ -147,6 +147,17 @@ exports.showProductionGMID = (req, res, next) => {
   });
 };
 
+exports.updateprice = (req, res, next) => {
+  console.log(req.body)
+  productionModel.updaterawValues(req.body.newvalue, req.body.id).then((result) => {
+    if (result[0]) {
+      res.status(200).json(result[1]);
+    } else {
+      res.status(400).json(result[1]);
+    }
+  });
+};
+
 exports.addProductiionGM = (req, res, next) => {
   productionModel.addproductionOrderGM(req.body).then((result) => {
     if (result[0]) {

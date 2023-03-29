@@ -925,6 +925,20 @@ module.exports = class productionModel {
         return [false, err];
       });
   }
+
+  static updaterawValues(newValue, id) {
+    return db
+      .execute("UPDATE raw_materials SET raw_value = ? WHERE id= ?", [
+        newValue,
+        id,
+      ])
+      .then((respo) => {
+        return [true, respo[0]];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
   static showProductionOrderCustom() {
     return db
       .execute(

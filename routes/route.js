@@ -111,6 +111,7 @@ router.post("/addproductFinished", production.addFinshedProduction);
 router.post("/addproductionGM", production.addProductiionGM);
 router.get("/showOrderGM", production.showProductionGM);
 router.post("/ShowGmOrderById", production.showProductionGMID);
+router.post("/changerawvalue", production.updateprice);
 
 ////////////////////////////////////////////////////////
 // finance module
