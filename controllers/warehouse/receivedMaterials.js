@@ -41,10 +41,10 @@ exports.acceptPurchased = async (req, res, next) => {
           console.log("found here");
           accsMat
             .checkExisAccsM(result.accs_name, result.material_type, result)
-            .then((found) => {
+            .then(async (found) => {
               if (found[0]) {
-                accsMat.addAccsQty(found[1], result);
-                accsMat.makeAcceptStatus(singleData.id);
+                await accsMat.addAccsQty(found[1], result);
+                await accsMat.makeAcceptStatus(singleData.id);
               } else {
                 res.status(400).json("No material Found");
 
@@ -54,10 +54,10 @@ exports.acceptPurchased = async (req, res, next) => {
         } else if (result.material_type == "RAW") {
           rawMat
             .checkExisRawM(result.raw_name, result.material_type, result)
-            .then((found) => {
+            .then(async (found) => {
               if (found[0]) {
-                rawMat.addQty(found[1], result);
-                accsMat.makeAcceptStatus(singleData.id);
+                await rawMat.addQty(found[1], result);
+                await accsMat.makeAcceptStatus(singleData.id);
               } else {
                 res.status(400).json("No material Found");
 
@@ -67,11 +67,11 @@ exports.acceptPurchased = async (req, res, next) => {
         } else if (result.material_type == "FIN") {
           finMat
             .checkExisFinM(result.fin_name, result.material_type, result)
-            .then((found) => {
+            .then(async (found) => {
               console.log("respo", found);
               if (found[0]) {
-                finMat.addQty(found[1], result);
-                accsMat.makeAcceptStatus(singleData.id);
+                await finMat.addQty(found[1], result);
+                await accsMat.makeAcceptStatus(singleData.id);
               } else {
                 res.status(400).json("No material Found");
 
