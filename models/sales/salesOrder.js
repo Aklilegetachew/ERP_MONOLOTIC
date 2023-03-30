@@ -89,7 +89,7 @@ module.exports = class salesOrder {
           data.final_diameter || "",
           data.final_quant,
           data.final_measureunit,
-          data.cus_advance || "",
+          data.cus_advance || "0",
           data.payment,
           "NEW",
         ]
