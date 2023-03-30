@@ -93,7 +93,7 @@ module.exports = class rawMaterial {
         let date = new Date(newMat.raw_date);
         return db
           .execute(
-            "INSERT INTO summery(material_id, material_type, summery_date, stockat_hand, stock_recieved, stock_issued, department_issued, stockat_end, fs_number, recived_kg, stockatend_kg) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO summery(material_id, material_type, summery_date, stockat_hand, stock_recieved, stock_issued, department_issued, stockat_end, fs_number, recived_kg, issues_kg) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             [
               oldMat[0].id,
               "RAW",
