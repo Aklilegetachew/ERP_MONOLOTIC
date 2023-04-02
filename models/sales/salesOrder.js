@@ -51,8 +51,7 @@ module.exports = class salesOrder {
           )
           .then((resp) => {
             return [true, "Production order added"];
-          })
-        
+          });
       })
       .catch((err) => {
         return [false, err];
@@ -98,6 +97,38 @@ module.exports = class salesOrder {
         return [true, IDgenerator];
       })
       .catch((err) => {
+        return [false, err];
+      });
+  }
+
+  static addSalesOrderBulk(data) {
+    const date = new Date(data.sales_date);
+    const today = new Date();
+    var IDgenerator = this.uniqueId();
+
+    return db
+      .execute(
+        "INSERT INTO sales_order (order_date, salesID, customer_name, customer_address, Tin_number, cus_total, cus_advance, payment, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+          date || today,
+          data.salesID,
+          data.customer_name,
+          data.customer_address,
+          data.Tin_number,
+          data.cus_total || "",
+          data.cus_advance || "0",
+          data.payment,
+          "NEW",
+        ]
+      )
+      .then(async (resu) => {
+        const [result] = await db.execute("SELECT LAST_INSERT_ID()");
+
+        console.log("Inserted row with ID:", result[0]["LAST_INSERT_ID()"]);
+        return [true, result[0]["LAST_INSERT_ID()"]];
+      })
+      .catch((err) => {
+        console.log(err);
         return [false, err];
       });
   }
@@ -180,6 +211,64 @@ module.exports = class salesOrder {
       .catch((err) => {
         return err;
       });
+  }
+
+  static async showCartID(ID) {
+    return await db
+      .execute("SELECT * FROM cart_detaile WHERE material_id = ?", [ID])
+      .then((resp) => {
+        return resp[0];
+      })
+      .catch((err) => {
+        return err;
+      });
+  }
+
+  static async paymentDetail(data, salesId) {
+    return db
+      .execute(
+        "INSERT INTO bank_status(bank_name, bank_account, payed_amount, remaining_amount, sales_id) VALUES (?, ?, ?, ?, ?)",
+        [
+          data.bank_name || "",
+          data.account_num || "-",
+          data.cus_advance || 0,
+          data.Remaining || data.cus_total,
+          salesId,
+        ]
+      )
+      .then((respo) => {
+        return [true, requestId];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+
+  static async cartDetail(data, salesId) {
+    try {
+      for (let i = 0; i < data.length; i++) {
+        const item = data[i];
+        await db.execute(
+          "INSERT INTO cart_detaile (item_name, item_description, item_quantity, material_id, measuring_unit, item_diameter, item_color, total_price, unit_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          [
+            item.fin_product,
+            item.final_materialCode,
+            item.final_quant,
+            salesId,
+            item.final_measureunit,
+            item.final_diameter,
+            item.final_color,
+            item.total_price,
+            item.unit_price,
+          ]
+        );
+      }
+
+      return [true, "cart detail"];
+    } catch (error) {
+      console.error(error);
+      return [false, error];
+    }
   }
 
   static fetchCartDetail(id) {

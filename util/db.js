@@ -10,19 +10,18 @@ const config = require("../config");
 // });
 
 //<<<<<<< HEAD
- //const pool = mysql.createPool({
-  // host: "localhost",
-  // user: config.DBUSER,
-  // database: config.DBNAME,
-  // password: config.DBPASSWORD,
- //});
-
+//const pool = mysql.createPool({
+// host: "localhost",
+// user: config.DBUSER,
+// database: config.DBNAME,
+// password: config.DBPASSWORD,
+//});
 
 //const pool = mysql.createPool({
- // host: "localhost",
- // user: "root",
- // database: "erp_db",
- // password: "",
+// host: "localhost",
+// user: "root",
+// database: "erp_db",
+// password: "",
 //});
 //=======
 const pool = mysql.createPool({

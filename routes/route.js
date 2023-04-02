@@ -79,6 +79,9 @@ router.post("/confirmStoreRelease", storeRelease.confirmRelease);
 router.get("/salesSummery", sales_summery.showAllSummery);
 
 router.post("/creatSalesOrder", salesOrder.creatSalesOrder);
+router.post("/creatBulkSalesOrder", salesOrder.creatBulkSalesOrder);
+router.post("/showCartbyId", salesOrder.showCartByID);
+
 router.get("/showSalesOrder", salesOrder.showSalesOrder);
 router.post("/showSalesOrderById", salesOrder.showSalesOrderById);
 router.post("/selectSalesOrder", salesOrder.selectSalesOrder);

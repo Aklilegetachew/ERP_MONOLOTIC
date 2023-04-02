@@ -75,7 +75,7 @@ exports.login = (req, res) => {
               // req.session.jwt = userJwt;
               return res
                 .status(200)
-                .json({ message: "Signed In", jwt: userJwt });
+                .json({ message: "Signed In", jwt: userJwt, role: result[0][0].user_role});
             } else {
               res.status(403).json({ message: "password", result: result[0] });
             }
