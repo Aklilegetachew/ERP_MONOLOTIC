@@ -86,6 +86,7 @@ router.post("/creatBulkSalesOrder", salesOrder.creatBulkSalesOrder);
 router.post("/showCartbyId", salesOrder.showCartByID);
 
 router.get("/showSalesOrder", salesOrder.showSalesOrder);
+router.get("/showSalesOrderpayment", salesOrder.showSalesOrderPA);
 router.post("/showSalesOrderById", salesOrder.showSalesOrderById);
 router.post("/selectSalesOrder", salesOrder.selectSalesOrder);
 

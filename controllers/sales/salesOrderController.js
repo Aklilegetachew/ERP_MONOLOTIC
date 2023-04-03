@@ -56,6 +56,12 @@ module.exports.showSalesOrder = (req, res, next) => {
   });
 };
 
+module.exports.showSalesOrderPA = (req, res, next) => {
+  salesModle.showAllOrderPA().then((respo) => {
+    res.status(200).json(respo);
+  });
+};
+
 module.exports.salesBankStatments = (req, res, next) => {
   console.log(req.body.ID)
   salesModle.showBankStatment(req.body.ID).then((respo) => {

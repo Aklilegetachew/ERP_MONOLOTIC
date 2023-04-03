@@ -216,6 +216,19 @@ module.exports = class salesOrder {
       });
   }
 
+  static showAllOrderPA() {
+    return db
+      .execute(
+        "SELECT * FROM sales_order WHERE status = 'Accepted' ORDER BY id DESC"
+      )
+      .then((resp) => {
+        return resp[0];
+      })
+      .catch((err) => {
+        return err;
+      });
+  }
+
   static showBankStatment(ID) {
     return db
       .execute("SELECT * FROM bank_status WHERE sales_id = ?", [ID])
