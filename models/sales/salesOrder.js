@@ -123,10 +123,12 @@ module.exports = class salesOrder {
         ]
       )
       .then(async (resu) => {
-        const [result] = await db.execute("SELECT LAST_INSERT_ID()");
+        const [result] = await db.execute(
+          "SELECT id FROM sales_order ORDER BY id DESC LIMIT 1;"
+        );
 
-        console.log("Inserted row with ID:", result[0]["LAST_INSERT_ID()"]);
-        return [true, result[0]["LAST_INSERT_ID()"]];
+        console.log("Inserted row with ID:", result[0]);
+        return [true, result[0]["id"]];
       })
       .catch((err) => {
         console.log(err);
