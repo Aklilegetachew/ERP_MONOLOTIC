@@ -41,6 +41,7 @@ router.post("/accsRequestion", requstion.addaccsrequestion);
 
 router.post("/showSummeryByID", summery.showById);
 router.post("/showSummeryByMonth", summery.showByIdMonth);
+router.post("/showSalesByMonth", summery.showBysalesByMonth);
 router.post("/showExpenseByMonth", summery.showByIdExpense);
 router.post("/expensesMonthly", summery.showExpensesMontly);
 router.post("/showSummeryByYear", summery.showByIdYear);

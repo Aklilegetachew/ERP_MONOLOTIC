@@ -118,6 +118,42 @@ module.exports = class storeRequestion {
     }
   }
 
+  static viewSalesMonth(selectedDate) {
+    if (selectedDate.start == null && selectedDate.end == null) {
+      console.log("Hello");
+      const currentMonth = new Date().getMonth();
+
+      return db
+        .execute(
+          "SELECT * FROM sales_order WHERE status = 'Accepted' ORDER BY id DESC"
+        )
+        .then((result) => {
+          console.log(result[0]);
+          return result[0];
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } else if (selectedDate.start !== null && selectedDate.end !== null) {
+      var start = new Date(selectedDate.start);
+      var end = new Date(selectedDate.end);
+      var startDateStr = start.toISOString().slice(0, 10);
+      var endDateStr = end.toISOString().slice(0, 10);
+      return db
+        .execute(
+          "SELECT * FROM sales_order WHERE DATE(order_date) BETWEEN ? AND ? AND status = 'Accepted' ORDER BY id DESC",
+          [startDateStr, endDateStr]
+        )
+        .then((result) => {
+          console.log("its here actualy");
+          return result[0];
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  }
+
   static viewExpenseCurrentMonth() {
     return db
       .execute(
@@ -131,7 +167,6 @@ module.exports = class storeRequestion {
       })
       .catch((err) => {
         return err;
-  
       });
   }
 
