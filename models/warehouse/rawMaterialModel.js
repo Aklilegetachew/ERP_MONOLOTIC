@@ -67,9 +67,10 @@ module.exports = class rawMaterial {
     console.log(mat);
     return db
       .execute(
-        "SELECT * FROM raw_materials WHERE raw_materialcode='" +
-          mat.raw_materialcode +
-          "'"
+        // "SELECT * FROM raw_materials WHERE raw_materialcode='" +
+        //   mat.raw_materialcode +
+        //   "'"
+          "SELECT * FROM raw_materials WHERE LOWER(raw_materialcode) = LOWER(?)", [mat.raw_materialcode]
       )
       .then((result) => {
         console.log(result[0]);

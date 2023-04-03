@@ -152,11 +152,11 @@ module.exports = class accessory {
   static checkExisAccsM(newName, material_type, mat) {
     return db
       .execute(
-        "SELECT * FROM accs_materials WHERE accs_name='" +
-          newName +
-          "'AND	accs_materialcode='" +
-          mat.accs_materialcode +
-          "'"
+        "SELECT * FROM accs_materials WHERE LOWER(accs_name)='" +
+        newName.toLowerCase() +
+        "' AND LOWER(accs_materialcode)='" +
+        mat.accs_materialcode.toLowerCase() +
+        "'"
       )
       .then((result) => {
         return result[0].length !== 0 ? [true, result[0]] : [false, result[0]];

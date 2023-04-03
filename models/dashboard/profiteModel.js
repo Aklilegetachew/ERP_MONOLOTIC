@@ -3,7 +3,10 @@ const db = require("../../util/db");
 module.exports = class ProfiteModule {
   static async fetchUserID(data) {
     return await db
-      .execute("SELECT * FROM users WHERE user_role = ? OR user_role = ?", [data, "Super Admin"])
+      .execute("SELECT * FROM users WHERE user_role = ? OR user_role = ?", [
+        data,
+        "Super Admin",
+      ])
       .then((respo) => {
         return [true, respo[0]];
       })
@@ -50,7 +53,7 @@ module.exports = class ProfiteModule {
   static fetchUncollected() {
     return db
       .execute(
-        "SELECT * FROM sales_order_prod WHERE status != 'Cash' ORDER BY sales_date ASC"
+        "SELECT * FROM sales_order WHERE payment != 'Cash' ORDER BY order_date ASC"
       )
       .then((respo) => {
         return [true, respo[0]];
@@ -145,19 +148,13 @@ module.exports = class ProfiteModule {
   static async getuncollecteds() {
     return await db
       .execute(
-        "SELECT * FROM sales_order_prod WHERE status = 'Advanced' OR status = 'Credit'"
+        "SELECT * FROM sales_order WHERE status = 'Accepted' AND payment = 'Advanced' OR payment = 'Credit'"
       )
       .then((respo) => {
         var totalUncollected = 0.0;
 
         for (let single of respo[0]) {
-          if (single.status === "Advanced") {
-            console.log(single.totalCash);
-            totalUncollected +=
-              parseFloat(single.totalCash) - parseFloat(single.advances);
-          } else if (single.status === "Credit") {
-            totalUncollected += parseFloat(single.totalCash);
-          }
+          totalUncollected += parseFloat(single.cust_remaining);
         }
         // respo[0].forEach((single) => {
         //   if (single.status === "Advanced") {

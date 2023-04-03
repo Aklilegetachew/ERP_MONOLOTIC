@@ -108,7 +108,7 @@ module.exports = class salesOrder {
 
     return db
       .execute(
-        "INSERT INTO sales_order (order_date, salesID, customer_name, customer_address, Tin_number, cus_total, cus_advance, payment, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO sales_order (order_date, salesID, customer_name, customer_address, Tin_number, cus_total, cus_advance, payment, status, cust_remaining) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           date || today,
           data.salesID,
@@ -119,6 +119,7 @@ module.exports = class salesOrder {
           data.cus_advance || "0",
           data.payment,
           "NEW",
+          data.Remaining,
         ]
       )
       .then(async (resu) => {
@@ -204,7 +205,18 @@ module.exports = class salesOrder {
 
   static showAllOrder() {
     return db
-      .execute("SELECT * FROM sales_order")
+      .execute("SELECT * FROM sales_order ORDER BY id DESC")
+      .then((resp) => {
+        return resp[0];
+      })
+      .catch((err) => {
+        return err;
+      });
+  }
+
+  static showBankStatment(ID) {
+    return db
+      .execute("SELECT * FROM bank_status WHERE sales_id = ?", [ID])
       .then((resp) => {
         return resp[0];
       })
@@ -227,13 +239,14 @@ module.exports = class salesOrder {
   static async paymentDetail(data, salesId) {
     return db
       .execute(
-        "INSERT INTO bank_status(bank_name, bank_account, payed_amount, remaining_amount, sales_id) VALUES (?, ?, ?, ?, ?)",
+        "INSERT INTO bank_status(bank_name, bank_account, payed_amount, remaining_amount, sales_id, remaining) VALUES (?, ?, ?, ?, ?, ?)",
         [
           data.bank_name || "",
           data.account_num || "-",
           data.cus_advance || 0,
           data.Remaining || data.cus_total,
           salesId,
+          data.Remaining,
         ]
       )
       .then((respo) => {

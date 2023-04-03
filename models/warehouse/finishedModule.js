@@ -237,7 +237,7 @@ module.exports = class accessory {
 
     return db
       .execute(
-        "SELECT * FROM finished_goods WHERE finished_name= ? AND finished_diameter = ? AND finished_materialcode = ? AND color= ?",
+        "SELECT * FROM finished_goods WHERE LOWER(finished_name) = LOWER(?) AND finished_diameter = LOWER(?) AND LOWER(finished_materialcode) = LOWER(?) AND LOWER(color) = LOWER(?)",
         [
           mat.fin_name,
           mat.fin_diameter,

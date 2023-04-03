@@ -130,6 +130,17 @@ module.exports = class accountRecivable {
       });
   }
 
+  static async getnewsalesOrder(ID) {
+    return await db
+      .execute("Select * From sales_order WHERE id = '" + ID + "'")
+      .then((respo) => {
+        return [true, respo[0][0]];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+
   static async updateComplete(data, salesOrder) {
     var advance = 0.0;
     var newBalance = 0.0;
@@ -174,7 +185,8 @@ module.exports = class accountRecivable {
     } else {
       return await db
         .execute(
-          "UPDATE sales_order_prod SET advances = ?, status = 'Cash' WHERE id = ?",[newadvance, data.ID]
+          "UPDATE sales_order_prod SET advances = ?, status = 'Cash' WHERE id = ?",
+          [newadvance, data.ID]
         )
         .then((respo) => {
           return [true, "Updated"];
@@ -184,6 +196,111 @@ module.exports = class accountRecivable {
         });
     }
   }
+
+  // static async updateBankComplete(data, salesOrder) {
+  //   var oldRemaing = parseFloat(salesOrder.cust_remaining);
+  //   var oldAdvance = parseFloat(salesOrder.cus_advance);
+  //   var NewPaymet = parseFloat(data.newPayment);
+  //   var newAdvance = oldAdvance + NewPaymet;
+
+  //   if (NewPaymet > oldRemaing) {
+  //     return [false, "Excceding total payment"];
+  //   }
+  //   var newRemaing = oldRemaing - NewPaymet;
+
+  //   if (newRemaing !== 0) {
+  //     return await db
+  //       .execute(
+  //         "UPDATE sales_order SET cus_advance = ?, cust_remaining = ?, payment = 'Advanced' WHERE id = ?",
+  //         [newAdvance, newRemaing, data.ID]
+  //       )
+  //       .then(async (respo) => {
+  //         await db
+  //           .execute(
+  //             "INSERT INTO bank_status(bank_name, bank_account, remaining_amount, sales_id, remaining, payed_amount) VALUES (?, ?, ?, ?, ?, ?)",
+  //             [
+  //               data.bankName,
+  //               data.bankAccount,
+  //               newRemaing,
+  //               data.ID,
+  //               newRemaing,
+  //               NewPaymet,
+  //             ]
+  //           )
+  //           .then((respo) => {
+  //             return [true, "Payment Updated"];
+  //           })
+  //           .catch((err) => {
+  //             console.log("response", err);
+  //             return [false, err];
+  //           });
+  //       })
+  //       .catch((err) => {
+  //         return [false, err];
+  //       });
+  //   } else {
+  //     return await db
+  //       .execute(
+  //         "UPDATE sales_order SET cus_advance = ?, payment = 'Cash' WHERE id = ?",
+  //         [remaining, data.ID]
+  //       )
+  //       .then(async (respo) => {
+  //         await db
+  //           .execute(
+  //             "INSERT INTO bank_status(bank_name, bank_account, remaining_amount, sales_id, remaining, payed_amount) VALUES(?, ?, ?, ?, ?, ?)",
+  //             [
+  //               data.bankName,
+  //               data.bankAccount,
+  //               newRemaing,
+  //               data.ID,
+  //               newRemaing,
+  //               NewPaymet,
+  //             ]
+  //           )
+  //           .then((respo) => {
+  //             return [true, "Payment Updated"];
+  //           })
+  //           .catch((err) => {
+  //             return [false, err];
+  //           });
+  //       })
+  //       .catch((err) => {
+  //         return [false, err];
+  //       });
+  //   }
+  // }
+
+  static async updateBankComplete(data, salesOrder) {
+    const oldRemaining = parseFloat(salesOrder.cust_remaining);
+    const oldAdvance = parseFloat(salesOrder.cus_advance);
+    const newPayment = parseFloat(data.newPayment);
+    const newAdvance = oldAdvance + newPayment;
+  
+    if (newPayment > oldRemaining) {
+      return [false, "Exceeding total payment"];
+    }
+  
+    const newRemaining = oldRemaining - newPayment;
+    const paymentType = newRemaining !== 0 ? "Advanced" : "Cash";
+  
+    try {
+      const [salesUpdateResult] = await db.execute(
+        "UPDATE sales_order SET cus_advance = ?, cust_remaining = ?, payment = ? WHERE id = ?",
+        [newAdvance, newRemaining, paymentType, data.ID]
+      );
+  
+      const [bankStatusInsertResult] = await db.execute(
+        "INSERT INTO bank_status(bank_name, bank_account, remaining_amount, sales_id, remaining, payed_amount) VALUES (?, ?, ?, ?, ?, ?)",
+        [data.bankName, data.bankAccount, newRemaining, data.ID, newRemaining, newPayment]
+      );
+  
+      return [true, "Payment updated"];
+    } catch (error) {
+      console.log(error);
+      return [false, error.message];
+    }
+  }
+  
   static async showsalesProdOrder() {
     return await db
       .execute("SELECT * FROM sales_order_prod")

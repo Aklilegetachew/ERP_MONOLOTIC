@@ -154,6 +154,21 @@ exports.makeCompelte = async (req, res, next) => {
   }
 };
 
+exports.makepaymentCompelte = async (req, res, next) => {
+  console.log(req.body);
+  const salesOrder = await accountRecivable.getnewsalesOrder(req.body.ID);
+
+  const results = await accountRecivable.updateBankComplete(
+    req.body,
+    salesOrder[1]
+  );
+  if (results[0]) {
+    res.status(200).json(results[1]);
+  } else {
+    res.status(404).json(results[1]);
+  }
+};
+
 exports.showSalesOrder = async (req, res, next) => {
   const result = await accountRecivable.showsalesProdOrder();
 

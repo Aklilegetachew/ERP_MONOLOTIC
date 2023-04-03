@@ -56,6 +56,14 @@ module.exports.showSalesOrder = (req, res, next) => {
   });
 };
 
+module.exports.salesBankStatments = (req, res, next) => {
+  console.log(req.body.ID)
+  salesModle.showBankStatment(req.body.ID).then((respo) => {
+    res.status(200).json(respo);
+  });
+};
+
+
 module.exports.showCartByID = async (req, res, next) => {
   try {
     const respo = await salesModle.showCartID(req.body.ID);
