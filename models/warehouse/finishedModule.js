@@ -237,15 +237,13 @@ module.exports = class accessory {
 
     return db
       .execute(
-        "SELECT * FROM finished_goods WHERE finished_name='" +
-          mat.fin_name +
-          "' AND finished_diameter ='" +
-          mat.fin_diameter +
-          "' AND finished_materialcode = '" +
-          mat.fin_materialcode +
-          "' AND color= '" +
-          mat.final_color +
-          "'"
+        "SELECT * FROM finished_goods WHERE LOWER(finished_name) = LOWER(?) AND finished_diameter = LOWER(?) AND LOWER(finished_materialcode) = LOWER(?) AND LOWER(color) = LOWER(?)",
+        [
+          mat.fin_name,
+          mat.fin_diameter,
+          mat.fin_materialcode,
+          mat.fin_color || mat.final_color,
+        ]
       )
       .then((result) => {
         return result[0].length !== 0 ? [true, result[0]] : [false, result[0]];

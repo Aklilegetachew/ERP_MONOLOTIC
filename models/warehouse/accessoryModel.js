@@ -66,7 +66,7 @@ module.exports = class accessory {
         let date = new Date(newMat.accs_date);
         return db
           .execute(
-            "INSERT INTO summery(material_id, material_type, summery_date, stockat_hand, stock_recieved, stock_issued, department_issued, stockat_end) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO summery(material_id, material_type, summery_date, stockat_hand, stock_recieved, stock_issued, department_issued, stockat_end, recived_kg, issues_kg) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             [
               oldMat[0].id,
               "ACCS",
@@ -76,6 +76,8 @@ module.exports = class accessory {
               "",
               newMat.personID,
               updateQuan,
+              "",
+              "",
             ]
           )
           .then((res) => {
@@ -84,6 +86,21 @@ module.exports = class accessory {
       })
       .catch((e) => {
         console.log(e);
+      });
+  }
+
+  static async makeAcceptStatus(itemID) {
+    return await db
+      .execute(
+        "UPDATE new_materials SET new_status = 'ACCEPTED' WHERE id='" +
+          itemID +
+          "'"
+      )
+      .then((result) => {
+        return true;
+      })
+      .catch((err) => {
+        return false;
       });
   }
 
@@ -135,11 +152,11 @@ module.exports = class accessory {
   static checkExisAccsM(newName, material_type, mat) {
     return db
       .execute(
-        "SELECT * FROM accs_materials WHERE accs_name='" +
-          newName +
-          "'AND	accs_materialcode='" +
-          mat.accs_materialcode +
-          "'"
+        "SELECT * FROM accs_materials WHERE LOWER(accs_name)='" +
+        newName.toLowerCase() +
+        "' AND LOWER(accs_materialcode)='" +
+        mat.accs_materialcode.toLowerCase() +
+        "'"
       )
       .then((result) => {
         return result[0].length !== 0 ? [true, result[0]] : [false, result[0]];

@@ -41,32 +41,41 @@ exports.acceptPurchased = async (req, res, next) => {
           console.log("found here");
           accsMat
             .checkExisAccsM(result.accs_name, result.material_type, result)
-            .then((found) => {
+            .then(async (found) => {
               if (found[0]) {
-                accsMat.addAccsQty(found[1], result);
+                await accsMat.addAccsQty(found[1], result);
+                await accsMat.makeAcceptStatus(singleData.id);
               } else {
-                accsMat.addAccessory(result);
+                res.status(400).json("No material Found");
+
+                // accsMat.addAccessory(result);
               }
             });
         } else if (result.material_type == "RAW") {
           rawMat
             .checkExisRawM(result.raw_name, result.material_type, result)
-            .then((found) => {
+            .then(async (found) => {
               if (found[0]) {
-                rawMat.addQty(found[1], result);
+                await rawMat.addQty(found[1], result);
+                await accsMat.makeAcceptStatus(singleData.id);
               } else {
-                rawMat.addRawMaterials(result);
+                res.status(400).json("No material Found");
+
+                // rawMat.addRawMaterials(result);
               }
             });
         } else if (result.material_type == "FIN") {
           finMat
             .checkExisFinM(result.fin_name, result.material_type, result)
-            .then((found) => {
+            .then(async (found) => {
               console.log("respo", found);
               if (found[0]) {
-                finMat.addQty(found[1], result);
+                await finMat.addQty(found[1], result);
+                await accsMat.makeAcceptStatus(singleData.id);
               } else {
-                finMat.addFinishedMat(result);
+                res.status(400).json("No material Found");
+
+                // finMat.addFinishedMat(result);
               }
             });
         }

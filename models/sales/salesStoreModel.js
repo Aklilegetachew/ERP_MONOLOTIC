@@ -11,26 +11,36 @@ module.exports = class salesStore {
         return false;
       });
   }
-
+  static async getProductList(id) {
+    return await db
+      .execute("SELECT * FROM cart_detaile WHERE material_id=" + id + "")
+      .then((respo) => {
+        return respo[0];
+      })
+      .catch((err) => {
+        return false;
+      });
+  }
   static async rawMaterialRequest(materialRequested) {
     const today = new Date();
+
     return await db
       .execute(
         "INSERT INTO material_request(mat_requestdate, mat_requestname, mat_requestdept, mat_reqpersonid, mat_quantity, req_materialtype, mat_status, salesID, FsNumber, mat_materialcode, finished_diameter, finished_Color, mat_description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           materialRequested.order_date || today,
-          materialRequested.final_product,
+          materialRequested.product.item_name || "",
           "SALES",
           "SALES",
-          materialRequested.final_quant || "",
+          materialRequested.product.item_quantity || "",
           "FIN",
           "PENDING",
           materialRequested.salesID || " ",
           materialRequested.salesID || " ",
-          materialRequested.final_materialCode || "",
-          materialRequested.final_diameter,
-          materialRequested.final_color,
-          materialRequested.final_diameter,
+          materialRequested.product.item_description || "",
+          materialRequested.product.item_diameter || "",
+          materialRequested.product.item_color || "",
+          materialRequested.product.item_diameter || "",
         ]
       )
       .then((result) => {
@@ -43,24 +53,27 @@ module.exports = class salesStore {
   }
 
   static async finishedRequest(materialRequested) {
+    const date = new Date(materialRequested.order_date);
+
     const today = new Date();
     return await db
       .execute(
-        "INSERT INTO material_request(mat_requestdate, mat_requestname, mat_requestdept, mat_reqpersonid, mat_quantity, req_materialtype, mat_status, salesID, FsNumber, mat_materialcode, finished_diameter, finished_Color, mat_description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO material_request(mat_requestdate, mat_requestname, mat_requestdept, mat_reqpersonid, mat_quantity, req_materialtype, mat_status, salesID, FsNumber, mat_materialcode, finished_diameter, finished_Color, mat_description, 	mat_unit) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
-          materialRequested.order_date || today,
+          date || today,
           materialRequested.final_product,
           "SALES",
           materialRequested.order_reciver,
           materialRequested.final_quant || "",
           "FIN",
           "PENDING",
-          materialRequested.salesID || " ",
+          materialRequested.salesID || materialRequested.refernceNum || "",
           materialRequested.refernceNum || " ",
           materialRequested.finished_materialcode || "",
           materialRequested.finished_diameter,
           materialRequested.final_color,
           materialRequested.finished_diameter,
+          materialRequested.final_measureunit,
         ]
       )
       .then((result) => {
@@ -73,24 +86,34 @@ module.exports = class salesStore {
   }
 
   static async postOrder(data) {
+    // var balance = 0.0;
+    // if (data.payment == "Advanced") {
+    //   balance = parseFloat(data.cus_total) - parseFloat(data.cus_advance);
+    // } else if (data.payment == "Credit") {
+    //   balance = 0;
+    // } else {
+    //   balance = data.cus_total;
+    // }
+    console.log("products sales Order", data.product.item_name);
     return await db
       .execute(
-        "INSERT INTO sales_order_prod(sales_date, customer_name, customer_address, customer_tin, product_orderd, product_color, product_desc, product_spec, total_product, mou, totalCash, status, advances, salesId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO sales_order_prod(sales_date, customer_name, customer_address, customer_tin, product_orderd, product_color, product_desc, product_spec, total_product, mou, totalCash, status, advances, salesId, balance) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           data.order_date,
-          data.customer_name,
-          data.customer_address,
-          data.Tin_number,
-          data.final_product,
-          data.final_color,
-          data.final_materialCode,
-          data.final_diameter,
-          data.final_quant,
-          data.final_measureunit,
-          data.cus_total,
-          data.payment,
+          data.customer_name || "",
+          data.customer_address || "",
+          data.Tin_number || "",
+          data.product.item_name || "",
+          data.product.item_color || "",
+          data.product.item_description || "",
+          data.product.item_diameter || "",
+          data.product.item_quantity || "",
+          data.product.measuring_unit || "",
+          data.product.total_price || "",
+          data.payment || "",
           data.cus_advance || "",
-          data.salesID,
+          data.salesID || "",
+          data.cust_remaining || "",
         ]
       )
       .then((respo) => {
@@ -168,6 +191,20 @@ module.exports = class salesStore {
     return await db
       .execute(
         "UPDATE sales_order SET status = 'COMPLETED' WHERE id='" + ID + "'"
+      )
+      .then((respo) => {
+        return [true, respo];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+
+  static async DeleteSales(ID) {
+    return await db
+      .execute(
+        
+        "DELETE FROM sales_order WHERE id = ?", [ID]
       )
       .then((respo) => {
         return [true, respo];

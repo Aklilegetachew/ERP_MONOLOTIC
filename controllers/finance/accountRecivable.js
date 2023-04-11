@@ -36,32 +36,48 @@ exports.generateProfit = async (req, res, next) => {
   // fetch sales Info
   const salesInfo = await accountRecivable.fetchSalesInfo(req.body);
 
-  // fetch cost From Batch
-  const CostInfo = await accountRecivable.fetchCostSummery(req.body);
+  // fetch old cost From Batch
+  const CostInfo = await accountRecivable.fetchCostSummery(req.body); // cost summery
 
+  // fetch old cost detail
+  const CostDetail = await accountRecivable.fetchCostDetail(CostInfo[1]); // cost Detail array
+
+  const newGID = accountRecivable.uniqueId();
+  // copy the old batch with new production ID
+  const UpdateDetail = await accountRecivable.UpdateCostDetail(
+    CostDetail[1],
+    newGID
+  ); // cost Detail array
+
+  // update the new cost summery and use the new ID to insert
+  const UpdateSummery = await accountRecivable.UpdateCostSummery(
+    CostInfo[1],
+    UpdateDetail[1],
+    req.body.mass
+  ); // cost summery update
+  // calculate profit
   if (req.body.VAT == 0) {
     profit =
       parseFloat(salesInfo[1].totalCash) -
-      parseFloat(CostInfo[1].finishedWVat) *
-        parseFloat(salesInfo[1].total_product);
+      parseFloat(UpdateSummery[1]) * parseFloat(salesInfo[1].total_product);
   } else {
     const Vats = parseFloat(salesInfo[1].totalCash) * 0.15;
     const SalesWithVat = Vats + parseFloat(salesInfo[1].totalCash);
     const costWithProduct =
-      parseFloat(CostInfo[1].finishedWVat) *
-      parseFloat(salesInfo[1].total_product);
+      parseFloat(UpdateSummery[1]) * parseFloat(salesInfo[1].total_product);
     profit = SalesWithVat - costWithProduct;
   }
   console.log("salesInfo:", salesInfo);
   console.log("CostInfo:", CostInfo);
   console.log("profit:", profit);
 
-  // save profit to profit table
+  // save profit to profit table but use updated ID
   const saveToProfit = await accountRecivable.ProfitStore(
     salesInfo[1],
     CostInfo[1],
     req.body,
-    profit
+    profit,
+    UpdateDetail[1]
   );
   const confirmGenerated = await accountRecivable.confirmGenerated(
     req.body.salesID
@@ -80,32 +96,48 @@ exports.updateProfit = async (req, res, next) => {
   // fetch sales Info
   const salesInfo = await accountRecivable.fetchSalesInfo(req.body);
 
-  // fetch cost From Batch
-  const CostInfo = await accountRecivable.fetchCostSummery(req.body);
+  // fetch old cost From Batch
+  const CostInfo = await accountRecivable.fetchCostSummery(req.body); // cost summery
 
+  // fetch old cost detail
+  const CostDetail = await accountRecivable.fetchCostDetail(CostInfo[1]); // cost Detail array
+
+  const newGID = accountRecivable.uniqueId();
+  // copy the old batch with new production ID
+  const UpdateDetail = await accountRecivable.UpdateCostDetail(
+    CostDetail[1],
+    newGID
+  ); // cost Detail array
+
+  // update the new cost summery and use the new ID to insert
+  const UpdateSummery = await accountRecivable.UpdateCostSummery(
+    CostInfo[1],
+    UpdateDetail[1],
+    req.body.mass
+  ); // cost summery update
+  // calculate profit
   if (req.body.VAT == 0) {
     profit =
       parseFloat(salesInfo[1].totalCash) -
-      parseFloat(CostInfo[1].finishedWVat) *
-        parseFloat(salesInfo[1].total_product);
+      parseFloat(UpdateSummery[1]) * parseFloat(salesInfo[1].total_product);
   } else {
     const Vats = parseFloat(salesInfo[1].totalCash) * 0.15;
     const SalesWithVat = Vats + parseFloat(salesInfo[1].totalCash);
     const costWithProduct =
-      parseFloat(CostInfo[1].finishedWVat) *
-      parseFloat(salesInfo[1].total_product);
+      parseFloat(UpdateSummery[1]) * parseFloat(salesInfo[1].total_product);
     profit = SalesWithVat - costWithProduct;
   }
   console.log("salesInfo:", salesInfo);
   console.log("CostInfo:", CostInfo);
   console.log("profit:", profit);
 
-  // save profit to profit table
+  // save profit to profit table but use updated ID
   const saveToProfit = await accountRecivable.ProfitStore(
     salesInfo[1],
     CostInfo[1],
     req.body,
-    profit
+    profit,
+    UpdateDetail[1]
   );
   const confirmGenerated = await accountRecivable.confirmGenerated(
     req.body.salesID
@@ -144,6 +176,21 @@ exports.makeCompelte = async (req, res, next) => {
   const salesOrder = await accountRecivable.getsalesOrder(req.body.ID);
 
   const results = await accountRecivable.updateComplete(
+    req.body,
+    salesOrder[1]
+  );
+  if (results[0]) {
+    res.status(200).json(results[1]);
+  } else {
+    res.status(404).json(results[1]);
+  }
+};
+
+exports.makepaymentCompelte = async (req, res, next) => {
+  console.log(req.body);
+  const salesOrder = await accountRecivable.getnewsalesOrder(req.body.ID);
+
+  const results = await accountRecivable.updateBankComplete(
     req.body,
     salesOrder[1]
   );

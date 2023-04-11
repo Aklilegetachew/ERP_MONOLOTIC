@@ -77,7 +77,7 @@ module.exports = class accountRecivable {
       });
   }
 
-  static async ProfitStore(salesInfo, costInfo, dataSubmited, profit) {
+  static async ProfitStore(salesInfo, costInfo, dataSubmited, profit, GID) {
     console.log("inputs", dataSubmited);
     console.log("profit", profit);
     console.log("salesI", salesInfo);
@@ -88,7 +88,7 @@ module.exports = class accountRecivable {
         "INSERT INTO dashboard_profit (salesID, producedId, total_sales, profit, vat) VALUES (?, ?, ?, ?, ?)",
         [
           dataSubmited.salesID,
-          costInfo.production_id,
+          GID,
           salesInfo.totalCash,
           profit,
           dataSubmited.VAT,
@@ -102,7 +102,6 @@ module.exports = class accountRecivable {
       });
   }
   static async fetchCostSummery(data) {
-    console.log("datas to use", data);
     return await db
       .execute("SELECT * FROM cost_summery WHERE cost_id = ?", [data.costId])
       .then((respo) => {
@@ -111,6 +110,77 @@ module.exports = class accountRecivable {
       .catch((err) => {
         return [false, err];
       });
+  }
+
+  static async fetchCostDetail(data) {
+    return await db
+      .execute("SELECT * FROM production_cost WHERE production_id = ?", [
+        data.production_id,
+      ])
+      .then((respo) => {
+        return [true, respo[0]];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+
+  static async UpdateCostSummery(data, GID, newMass) {
+    console.log("updatesCost summery", data);
+
+    var newCostofProduct = parseFloat(data.oneKgCost) * parseFloat(newMass);
+    var newOtherCost = parseFloat(newCostofProduct) * 0.15;
+    var totalCost = newCostofProduct + newOtherCost;
+    try {
+      await db.execute(
+        "INSERT INTO cost_summery(production_id, total_raw_cost, total_mass, oneKgCost, oneFinCost, other_cost, finished_mass, quantityProduced, cost_status, finishedWVat, batchNum) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+          GID,
+          data.total_raw_cost,
+          data.total_mass,
+          data.oneKgCost,
+          newCostofProduct.toFixed(2),
+          newOtherCost.toFixed(2),
+          newMass,
+          data.quantityProduced,
+          data.cost_status,
+          totalCost.toFixed(2),
+          data.batchNum,
+        ]
+      );
+      return [true, totalCost];
+    } catch (err) {
+      return [false, err];
+    }
+  }
+
+  static async UpdateCostDetail(datas, GID) {
+    console.log("updatesCost Detail");
+    try {
+      for (let i = 0; i < datas.length; i++) {
+        const data = datas[i];
+        await db.execute(
+          "INSERT INTO production_cost(production_id, fs_num, raw_name, raw_materialcode, each_value, each_total, totalValue, valueper1kg, totalmass, date_rec, each_quantity) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          [
+            GID,
+            data.fs_num,
+            data.raw_name,
+            data.raw_materialcode,
+            data.each_value,
+            data.each_total,
+            data.totalValue,
+            data.valueper1kg,
+            data.totalmass,
+            data.date_rec,
+            data.each_quantity,
+          ]
+        );
+      }
+      return [true, GID];
+    } catch (err) {
+      console.log(err);
+      return [false, err];
+    }
   }
 
   static uniqueId() {
@@ -122,6 +192,17 @@ module.exports = class accountRecivable {
   static async getsalesOrder(ID) {
     return await db
       .execute("Select * From sales_order_prod WHERE id = '" + ID + "'")
+      .then((respo) => {
+        return [true, respo[0][0]];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+
+  static async getnewsalesOrder(ID) {
+    return await db
+      .execute("Select * From sales_order WHERE id = '" + ID + "'")
       .then((respo) => {
         return [true, respo[0][0]];
       })
@@ -174,7 +255,8 @@ module.exports = class accountRecivable {
     } else {
       return await db
         .execute(
-          "UPDATE sales_order_prod SET advances = ?, status = 'Cash' WHERE id = ?",[newadvance, data.ID]
+          "UPDATE sales_order_prod SET advances = ?, status = 'Cash' WHERE id = ?",
+          [newadvance, data.ID]
         )
         .then((respo) => {
           return [true, "Updated"];
@@ -184,6 +266,118 @@ module.exports = class accountRecivable {
         });
     }
   }
+
+  // static async updateBankComplete(data, salesOrder) {
+  //   var oldRemaing = parseFloat(salesOrder.cust_remaining);
+  //   var oldAdvance = parseFloat(salesOrder.cus_advance);
+  //   var NewPaymet = parseFloat(data.newPayment);
+  //   var newAdvance = oldAdvance + NewPaymet;
+
+  //   if (NewPaymet > oldRemaing) {
+  //     return [false, "Excceding total payment"];
+  //   }
+  //   var newRemaing = oldRemaing - NewPaymet;
+
+  //   if (newRemaing !== 0) {
+  //     return await db
+  //       .execute(
+  //         "UPDATE sales_order SET cus_advance = ?, cust_remaining = ?, payment = 'Advanced' WHERE id = ?",
+  //         [newAdvance, newRemaing, data.ID]
+  //       )
+  //       .then(async (respo) => {
+  //         await db
+  //           .execute(
+  //             "INSERT INTO bank_status(bank_name, bank_account, remaining_amount, sales_id, remaining, payed_amount) VALUES (?, ?, ?, ?, ?, ?)",
+  //             [
+  //               data.bankName,
+  //               data.bankAccount,
+  //               newRemaing,
+  //               data.ID,
+  //               newRemaing,
+  //               NewPaymet,
+  //             ]
+  //           )
+  //           .then((respo) => {
+  //             return [true, "Payment Updated"];
+  //           })
+  //           .catch((err) => {
+  //             console.log("response", err);
+  //             return [false, err];
+  //           });
+  //       })
+  //       .catch((err) => {
+  //         return [false, err];
+  //       });
+  //   } else {
+  //     return await db
+  //       .execute(
+  //         "UPDATE sales_order SET cus_advance = ?, payment = 'Cash' WHERE id = ?",
+  //         [remaining, data.ID]
+  //       )
+  //       .then(async (respo) => {
+  //         await db
+  //           .execute(
+  //             "INSERT INTO bank_status(bank_name, bank_account, remaining_amount, sales_id, remaining, payed_amount) VALUES(?, ?, ?, ?, ?, ?)",
+  //             [
+  //               data.bankName,
+  //               data.bankAccount,
+  //               newRemaing,
+  //               data.ID,
+  //               newRemaing,
+  //               NewPaymet,
+  //             ]
+  //           )
+  //           .then((respo) => {
+  //             return [true, "Payment Updated"];
+  //           })
+  //           .catch((err) => {
+  //             return [false, err];
+  //           });
+  //       })
+  //       .catch((err) => {
+  //         return [false, err];
+  //       });
+  //   }
+  // }
+
+  static async updateBankComplete(data, salesOrder) {
+    const oldRemaining = parseFloat(salesOrder.cust_remaining);
+    const oldAdvance = parseFloat(salesOrder.cus_advance);
+    const newPayment = parseFloat(data.newPayment);
+    const newAdvance = oldAdvance + newPayment;
+
+    if (newPayment > oldRemaining) {
+      return [false, "Exceeding total payment"];
+    }
+
+    const newRemaining = oldRemaining - newPayment;
+    const paymentType = newRemaining !== 0 ? "Advanced" : "Cash";
+
+    try {
+      const [salesUpdateResult] = await db.execute(
+        "UPDATE sales_order SET cus_advance = ?, cust_remaining = ?, payment = ? WHERE id = ?",
+        [newAdvance, newRemaining, paymentType, data.ID]
+      );
+
+      const [bankStatusInsertResult] = await db.execute(
+        "INSERT INTO bank_status(bank_name, bank_account, remaining_amount, sales_id, remaining, payed_amount) VALUES (?, ?, ?, ?, ?, ?)",
+        [
+          data.bankName,
+          data.bankAccount,
+          newRemaining,
+          data.ID,
+          newRemaining,
+          newPayment,
+        ]
+      );
+
+      return [true, "Payment updated"];
+    } catch (error) {
+      console.log(error);
+      return [false, error.message];
+    }
+  }
+
   static async showsalesProdOrder() {
     return await db
       .execute("SELECT * FROM sales_order_prod")

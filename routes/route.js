@@ -41,6 +41,8 @@ router.post("/accsRequestion", requstion.addaccsrequestion);
 
 router.post("/showSummeryByID", summery.showById);
 router.post("/showSummeryByMonth", summery.showByIdMonth);
+router.post("/showSalesByMonth", summery.showBysalesByMonth);
+router.post("/showBankStatmentDate", summery.showByBankByMonth);
 router.post("/showExpenseByMonth", summery.showByIdExpense);
 router.post("/expensesMonthly", summery.showExpensesMontly);
 router.post("/showSummeryByYear", summery.showByIdYear);
@@ -72,14 +74,20 @@ router.get("/showAcceptedRequestions", requestForm.showStatus);
 router.post("/makeSale", storeRelease.makeSales);
 router.post("/makeComplete", storeRelease.makeComplete);
 router.post("/acceptSalesOrder", storeRelease.AcceptSales);
+router.post("/acceptBulkSalesOrder", storeRelease.AcceptBulkSales);
 router.post("/finishedgoodRequestion", storeRelease.requestFinishedGood);
 
 router.post("/confirmStoreRelease", storeRelease.confirmRelease);
-
+router.post("/deleteSales", storeRelease.deleteSalesOrder);
 router.get("/salesSummery", sales_summery.showAllSummery);
+router.post("/showBankStatment", salesOrder.salesBankStatments);
 
 router.post("/creatSalesOrder", salesOrder.creatSalesOrder);
+router.post("/creatBulkSalesOrder", salesOrder.creatBulkSalesOrder);
+router.post("/showCartbyId", salesOrder.showCartByID);
+
 router.get("/showSalesOrder", salesOrder.showSalesOrder);
+router.get("/showSalesOrderpayment", salesOrder.showSalesOrderPA);
 router.post("/showSalesOrderById", salesOrder.showSalesOrderById);
 router.post("/selectSalesOrder", salesOrder.selectSalesOrder);
 
@@ -103,6 +111,7 @@ router.get("/rawmaterialRequestResponse", production.resporawMaterialRequest);
 router.post("/editBatch", production.editBatch);
 
 router.post("/deleteProductionOrderRow", production.deleteOrder);
+
 router.post("/addProductProduced", production.productFinshed);
 router.get("/showFinishedProduction", production.showFinishedProduction);
 router.post("/makeSummery", production.summeryMaker);
@@ -136,10 +145,12 @@ router.post("/accountRecivable", accountRecivable.addRecivable);
 router.get("/showaccountRecivable", accountRecivable.showRecivable);
 router.post("/completeSalesOrder", accountPayable.makeCompelte);
 router.post("/completeRecibableSalesOrder", accountRecivable.makeCompelte);
+router.post("/completePayment", accountRecivable.makepaymentCompelte);
 router.get("/shoesalesOrderProd", accountRecivable.showSalesOrder);
 router.get("/showsalesOrderprofit", accountRecivable.showSalesOrderPro);
 router.post("/shoesalesOrderProdById", accountRecivable.showSalesOrderById);
 router.post("/deleteCostSummery", accountRecivable.deletebatchCost);
+router.post("/deleteSales", accountRecivable.deletebatchCost);
 
 router.post("/subAsset", assetMangment.subAsset);
 router.post("/addAsset", assetMangment.addAsset);

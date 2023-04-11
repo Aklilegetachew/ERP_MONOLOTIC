@@ -7,7 +7,7 @@ const accountRecivable = require("..//finance/accountRecivable");
 module.exports = class storeRequestion {
   static showRequstion() {
     return db
-      .execute("SELECT * FROM material_request")
+      .execute("SELECT * FROM material_request WHERE mat_status = 'PENDING'")
       .then((result) => {
         return result[0];
       })

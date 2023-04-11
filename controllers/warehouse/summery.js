@@ -21,6 +21,31 @@ exports.showByIdMonth = async (req, res, next) => {
   console.log(result);
   res.status(200).json(result);
 };
+
+exports.showBysalesByMonth = async (req, res, next) => {
+  console.log(req.body);
+  const result = await summeryClass.viewSalesMonth(
+   
+    req.body.selectedDate,
+   
+  );
+  console.log(result);
+  res.status(200).json(result);
+};
+
+exports.showByBankByMonth = async (req, res, next) => {
+  console.log(req.body);
+  const result = await summeryClass.viewBankMonth(
+   
+    req.body.selectedDate,
+   
+  );
+  console.log(result);
+  res.status(200).json(result);
+};
+
+
+
 exports.showByIdExpense = async (req, res, next) => {
   console.log(req.body);
   const result = await summeryClass.viewExpenseByMonth(

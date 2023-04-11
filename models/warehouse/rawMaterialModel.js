@@ -67,9 +67,10 @@ module.exports = class rawMaterial {
     console.log(mat);
     return db
       .execute(
-        "SELECT * FROM raw_materials WHERE raw_materialcode='" +
-          mat.raw_materialcode +
-          "'"
+        // "SELECT * FROM raw_materials WHERE raw_materialcode='" +
+        //   mat.raw_materialcode +
+        //   "'"
+          "SELECT * FROM raw_materials WHERE LOWER(raw_materialcode) = LOWER(?)", [mat.raw_materialcode]
       )
       .then((result) => {
         console.log(result[0]);
@@ -93,7 +94,7 @@ module.exports = class rawMaterial {
         let date = new Date(newMat.raw_date);
         return db
           .execute(
-            "INSERT INTO summery(material_id, material_type, summery_date, stockat_hand, stock_recieved, stock_issued, department_issued, stockat_end) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO summery(material_id, material_type, summery_date, stockat_hand, stock_recieved, stock_issued, department_issued, stockat_end, fs_number, recived_kg, issues_kg) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             [
               oldMat[0].id,
               "RAW",
@@ -103,6 +104,9 @@ module.exports = class rawMaterial {
               "",
               newMat.personID,
               updateQuan,
+              newMat.raw_referncenum,
+              "",
+              "",
             ]
           )
           .then((res) => {
