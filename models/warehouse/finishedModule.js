@@ -235,10 +235,24 @@ module.exports = class accessory {
   static checkExisFinM(newName, material_type, mat) {
     console.log("checker", mat);
 
+    // return db
+    //   .execute(
+    //     "SELECT * FROM finished_goods WHERE LOWER(finished_name) = LOWER(?) AND finished_diameter = LOWER(?) AND LOWER(finished_materialcode) = LOWER(?) AND LOWER(color) = LOWER(?)",
+    //     [
+    //       mat.fin_name,
+    //       mat.fin_diameter,
+    //       mat.fin_materialcode,
+    //       mat.fin_color || mat.final_color,
+    //     ]
+    //   )
     return db
       .execute(
-        "SELECT * FROM finished_goods WHERE LOWER(finished_name) = LOWER(?) AND finished_diameter = LOWER(?) AND LOWER(finished_materialcode) = LOWER(?) AND LOWER(color) = LOWER(?)",
+        "SELECT * FROM finished_goods WHERE LOWER(finished_name) = LOWER(?) AND LOWER(finished_diameter) = LOWER(?) AND LOWER(finished_materialcode) = LOWER(?) AND LOWER(color) = LOWER(?) UNION SELECT * FROM finished_goods WHERE SOUNDEX(finished_name) = SOUNDEX(?) AND SOUNDEX(finished_diameter) = SOUNDEX(?) AND SOUNDEX(finished_materialcode) = SOUNDEX(?) AND SOUNDEX(color) = SOUNDEX(?)",
         [
+          mat.fin_name,
+          mat.fin_diameter,
+          mat.fin_materialcode,
+          mat.fin_color || mat.final_color,
           mat.fin_name,
           mat.fin_diameter,
           mat.fin_materialcode,
