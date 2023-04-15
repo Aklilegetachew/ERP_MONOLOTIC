@@ -191,6 +191,7 @@ router.get("/getMonthExpense", dashboard.monthlyExpense);
 
 ///////////////////////////////////////////////////////////
 router.post("/diameterSelect", dashboard.selectDiameter);
+router.get("/finishedGoodSelect", dashboard.selectAllFin)
 router.get("/colorSelect", dashboard.getLastFive);
 router.get("/nameSelect", dashboard.getLastFive);
 

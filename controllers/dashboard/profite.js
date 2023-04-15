@@ -118,6 +118,18 @@ exports.selectDiameter = (req, res, next) => {
   });
 };
 
+
+exports.selectAllFin = (req, res, next) => {
+  
+  profit.fetchuniqFin().then((respo) => {
+    if (respo[0]) {
+      res.status(200).json(respo[1]);
+    } else {
+      res.status(400).json(respo[1]);
+    }
+  });
+};
+
 exports.getExcelFile = (req, res, next) => {
   const xlsx = officegen("xlsx");
 

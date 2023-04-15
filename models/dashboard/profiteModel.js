@@ -88,6 +88,19 @@ module.exports = class ProfiteModule {
       });
   }
 
+  static fetchuniqFin() {
+    return db
+      .execute(
+        "SELECT DISTINCT finished_name AS name, finished_description AS description, finished_materialcode AS materialcode, finished_diameter AS diameter FROM finished_goods"
+      )
+      .then((respo) => {
+        return [true, respo[0]];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+
   static async fetchproductsold(keyWord) {
     console.log(keyWord);
     return await db
