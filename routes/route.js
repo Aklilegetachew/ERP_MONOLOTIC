@@ -47,6 +47,7 @@ router.post("/showExpenseByMonth", summery.showByIdExpense);
 router.post("/expensesMonthly", summery.showExpensesMontly);
 router.post("/showSummeryByYear", summery.showByIdYear);
 router.post("/showAllByType", summery.showByType);
+router.post("/deleteStockSummery", summery.deleteStockSummery)
 
 ///// for searching purpuse endpoints
 router.post("/searchName", searchController.searchName);

@@ -24,27 +24,17 @@ exports.showByIdMonth = async (req, res, next) => {
 
 exports.showBysalesByMonth = async (req, res, next) => {
   console.log(req.body);
-  const result = await summeryClass.viewSalesMonth(
-   
-    req.body.selectedDate,
-   
-  );
+  const result = await summeryClass.viewSalesMonth(req.body.selectedDate);
   console.log(result);
   res.status(200).json(result);
 };
 
 exports.showByBankByMonth = async (req, res, next) => {
   console.log(req.body);
-  const result = await summeryClass.viewBankMonth(
-   
-    req.body.selectedDate,
-   
-  );
+  const result = await summeryClass.viewBankMonth(req.body.selectedDate);
   console.log(result);
   res.status(200).json(result);
 };
-
-
 
 exports.showByIdExpense = async (req, res, next) => {
   console.log(req.body);
@@ -79,6 +69,13 @@ exports.showByIdYear = async (req, res, next) => {
 exports.showByType = async (req, res, next) => {
   console.log(req.body);
   const result = await summeryClass.viewType(req.body.materialType);
+
+  res.status(200).json(result);
+};
+
+exports.deleteStockSummery = async (req, res, next) => {
+  console.log(req.body);
+  const result = await summeryClass.deleteSummery(req.body.id);
 
   res.status(200).json(result);
 };

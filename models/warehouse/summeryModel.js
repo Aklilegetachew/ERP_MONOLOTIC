@@ -341,4 +341,87 @@ module.exports = class storeRequestion {
         });
     }
   }
+
+  static async selectDeletdRow(id) {
+    return await db
+      .execute("SELECT * FROM summery WHERE id = ?", [id])
+      .then((respo) => {
+        return respo[0];
+      })
+      .catch((e) => {
+        return e;
+      });
+  }
+  static async selectFinishedGood(id) {
+    return await db
+      .execute("SELECT * FROM finished_goods WHERE id = ?", [id])
+      .then((respo) => {
+        return respo[0];
+      })
+      .catch((e) => {
+        return e;
+      });
+  }
+
+  static async selectAllBelowList(id, materialID) {
+    return await db
+      .execute("SELECT * FROM summery WHERE id > ? AND material_id = ?", [
+        id,
+        materialID,
+      ])
+      .then((respo) => {
+        return respo[0];
+      })
+      .catch((e) => {
+        return e;
+      });
+  }
+
+  static async updateBalance(materialID, balance) {
+    return await db
+      .execute("UPDATE finished_goods SET finished_quantity = ? WHERE id = ?", [
+        balance,
+        materialID,
+      ])
+      .then((respo) => {
+        return respo[0];
+      })
+      .catch((e) => {
+        return e;
+      });
+  }
+
+  static async updateRows(
+    id,
+    stockat_hand,
+    stock_recieved,
+    stock_issued,
+    stockat_end,
+    issues_kg,
+    stockatend_kg,
+    recived_kg
+  ) {
+    return await db
+      .execute(
+        "UPDATE summery SET stockat_hand = ?, stock_recieved = ?, stock_issued = ?, stockat_end = ?, issues_kg = ?, stockatend_kg = ?, recived_kg = ? WHERE id = ?",
+        [
+          id,
+          stockat_hand,
+          stock_recieved,
+          stock_issued,
+          stockat_end,
+          issues_kg,
+          stockatend_kg,
+          recived_kg,
+        ]
+      )
+      .then((respo) => {
+        return respo[0];
+      })
+      .catch((e) => {
+        return e;
+      });
+  }
+
+  static deleteSummery(id, materialId) {}
 };
