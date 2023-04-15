@@ -10,7 +10,6 @@ exports.NotifyingTG = async (req, res, next) => {
   const bot = new TelegramBot(token, { polling: true });
   const message = req.body.message;
   const toMessage = req.body.To;
-  
 
   if (toMessage == "warehouse") {
     const chatIds = await profit.fetchUserID("Ware House");
@@ -118,12 +117,26 @@ exports.selectDiameter = (req, res, next) => {
   });
 };
 
-
 exports.selectAllFin = (req, res, next) => {
-  
   profit.fetchuniqFin().then((respo) => {
     if (respo[0]) {
-      res.status(200).json(respo[1]);
+      console.log(respo[1]);
+
+      const Names = [...new Set(respo[1].map((item) => item.name))];
+      const MaterialCodes = [
+        ...new Set(respo[1].map((item) => item.materialcode)),
+      ];
+      const Desc = [...new Set(respo[1].map((item) => item.description))];
+      const Diameter = [...new Set(respo[1].map((item) => item.diameter))];
+      const colors = [...new Set(respo[1].map((item) => item.colors))];
+
+      res.status(200).json({
+        Names,
+        MaterialCodes,
+        Desc,
+        Diameter,
+        colors,
+      });
     } else {
       res.status(400).json(respo[1]);
     }

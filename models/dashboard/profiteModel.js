@@ -91,7 +91,7 @@ module.exports = class ProfiteModule {
   static fetchuniqFin() {
     return db
       .execute(
-        "SELECT DISTINCT finished_name AS name, finished_description AS description, finished_materialcode AS materialcode, finished_diameter AS diameter FROM finished_goods"
+        "SELECT DISTINCT finished_name AS name, finished_description AS description, finished_materialcode AS materialcode, finished_diameter AS diameter, color AS colors FROM finished_goods"
       )
       .then((respo) => {
         return [true, respo[0]];
