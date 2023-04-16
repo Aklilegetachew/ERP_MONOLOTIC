@@ -403,6 +403,23 @@ module.exports = class storeRequestion {
       });
   }
 
+  static async ittrtorUpdate(eachData, newStockAtHand, finshedMass) {
+    console.log("here", eachData);
+
+    var newStockAtHandMass = 0.0;
+    var newStockAtEnd = 0.0;
+    if (eachData.stock_recieved == "") {
+      newStockAtEnd =
+        parseFloat(newStockAtHand) - parseFloat(eachData.stock_issued);
+      newStockAtHandMass = parseFloat(newStockAtEnd) * parseFloat(finshedMass);
+    } else {
+      newStockAtEnd =
+        parseFloat(newStockAtHand) + parseFloat(eachData.stock_recieved);
+      newStockAtHandMass = parseFloat(newStockAtEnd) * parseFloat(finshedMass);
+    }
+    return [newStockAtEnd, newStockAtHandMass];
+  }
+
   static async updateBalanceRaw(materialID, balance) {
     return await db
       .execute("UPDATE raw_materials SET raw_quantity = ? WHERE id = ?", [
@@ -470,35 +487,32 @@ module.exports = class storeRequestion {
       console.log("all summery beloow ", allSummeryBellow);
 
       if (allSummeryBellow.length !== 0) {
-        allSummeryBellow.map(async (eachData) => {
-          console.log("here", eachData);
-          var newStockAtHand = lastAtHand;
-          var newStockAtHandMass = 0.0;
-          var newStockAtEnd = 0.0;
-          if (eachData.stock_recieved == "") {
-            newStockAtEnd =
-              parseFloat(newStockAtHand) - parseFloat(eachData.stock_issued);
-            newStockAtHandMass =
-              parseFloat(newStockAtEnd) * parseFloat(finshedMass);
-          } else {
-            newStockAtEnd =
-              parseFloat(newStockAtHand) + parseFloat(eachData.stock_recieved);
-            newStockAtHandMass =
-              parseFloat(newStockAtEnd) * parseFloat(finshedMass);
-          }
-          const respon = await this.updateRows(
-            eachData.id,
-            newStockAtHand,
-            newStockAtEnd,
-            newStockAtHandMass
-          );
-          console.log("respon", respon);
-          lastAtHand = newStockAtEnd;
+        try {
+          for (const eachData of allSummeryBellow) {
+            //
+            const result = await this.ittrtorUpdate(
+              eachData,
+              lastAtHand,
+              finshedMass
+            );
+            const respon = await this.updateRows(
+              eachData.id,
+              lastAtHand,
+              result[0],
+              result[1]
+            );
+            console.log("respon", respon);
+            lastAtHand = result[0];
 
-          console.log("lastAtHand", lastAtHand);
-        });
-        const response = await this.updateBalance(materialId, lastAtHand);
-        return [true, "Deleted Succesfully"];
+            console.log("lastAtHand", lastAtHand);
+          }
+          const response = await this.updateBalance(materialId, lastAtHand);
+          const deletResult = await this.deleteSummeryRow(id);
+          return [true, "Deleted Succesfully"];
+        } catch (err) {
+          console.log("err", err);
+          return [false, err];
+        }
       } else {
         const response = await this.deleteSummeryRow(id);
         if (response[0] == true) {
@@ -508,8 +522,6 @@ module.exports = class storeRequestion {
           return [false, response];
         }
       }
-
-      
     } else if (materialType == "RAW") {
       var lastAtHand = await summery[0].stockat_hand;
 
@@ -518,27 +530,33 @@ module.exports = class storeRequestion {
       console.log("all summery beloow ", allSummeryBellow);
 
       if (allSummeryBellow.length !== 0) {
-        allSummeryBellow.map(async (eachData) => {
-          var newStockAtHand = lastAtHand;
-          var newStockAtHandMass = 0.0;
-          var newStockAtEnd = 0.0;
-          if (eachData.stock_recieved == "") {
-            newStockAtEnd =
-              parseFloat(newStockAtHand) - parseFloat(eachData.stock_issued);
-          } else {
-            newStockAtEnd =
-              parseFloat(newStockAtHand) + parseFloat(eachData.stock_recieved);
+        try {
+          for (const eachData of allSummeryBellow) {
+            var newStockAtHand = lastAtHand;
+            var newStockAtHandMass = 0.0;
+            var newStockAtEnd = 0.0;
+            if (eachData.stock_recieved == "") {
+              newStockAtEnd =
+                parseFloat(newStockAtHand) - parseFloat(eachData.stock_issued);
+            } else {
+              newStockAtEnd =
+                parseFloat(newStockAtHand) +
+                parseFloat(eachData.stock_recieved);
+            }
+            const respon = await this.updateRows(
+              eachData.id,
+              newStockAtHand,
+              newStockAtEnd,
+              ""
+            );
+            lastAtHand = newStockAtEnd;
           }
-          const respon = await this.updateRows(
-            id,
-            newStockAtHand,
-            newStockAtEnd,
-            ""
-          );
-          lastAtHand = newStockAtEnd;
-        });
-        const response = await this.updateBalanceRaw(materialId, lastAtHand);
-        return [true, "Deleted Succesfully"];
+          const response = await this.updateBalanceRaw(materialId, lastAtHand);
+          return [true, "Deleted Succesfully"];
+        } catch (err) {
+          console.log("err", err);
+          return [false, err];
+        }
       } else {
         const response = await this.deleteSummeryRow(id);
         if (response[0] == true) {
@@ -556,27 +574,33 @@ module.exports = class storeRequestion {
       console.log("all summery beloow ", allSummeryBellow);
 
       if (allSummeryBellow.length !== 0) {
-        allSummeryBellow.map(async (eachData) => {
-          var newStockAtHand = lastAtHand;
-          var newStockAtHandMass = 0.0;
-          var newStockAtEnd = 0.0;
-          if (eachData.stock_recieved == "") {
-            newStockAtEnd =
-              parseFloat(newStockAtHand) - parseFloat(eachData.stock_issued);
-          } else {
-            newStockAtEnd =
-              parseFloat(newStockAtHand) + parseFloat(eachData.stock_recieved);
+        try {
+          for (const eachData of allSummeryBellow) {
+            var newStockAtHand = lastAtHand;
+            var newStockAtHandMass = 0.0;
+            var newStockAtEnd = 0.0;
+            if (eachData.stock_recieved == "") {
+              newStockAtEnd =
+                parseFloat(newStockAtHand) - parseFloat(eachData.stock_issued);
+            } else {
+              newStockAtEnd =
+                parseFloat(newStockAtHand) +
+                parseFloat(eachData.stock_recieved);
+            }
+            const respon = await this.updateRows(
+              eachData.id,
+              newStockAtHand,
+              newStockAtEnd,
+              ""
+            );
+            lastAtHand = newStockAtEnd;
           }
-          const respon = await this.updateRows(
-            id,
-            newStockAtHand,
-            newStockAtEnd,
-            ""
-          );
-          lastAtHand = newStockAtEnd;
-        });
-        const response = await this.updateBalanceAccs(materialId, lastAtHand);
-        return [true, "Deleted Succesfully"];
+          const response = await this.updateBalanceAccs(materialId, lastAtHand);
+          return [true, "Deleted Succesfully"];
+        } catch (err) {
+          console.log("err", err);
+          return [false, err];
+        }
       } else {
         const response = await this.deleteSummeryRow(id);
         if (response[0] == true) {
