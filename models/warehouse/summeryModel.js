@@ -516,7 +516,7 @@ module.exports = class storeRequestion {
       } else {
         const response = await this.deleteSummeryRow(id);
         if (response[0] == true) {
-          const response = await this.updateBalance(materialId, lastAtHand);
+          const response = await this.updateBalance(materialId, 0);
           return [true, "Deleted Succesfully"];
         } else {
           return [false, response];
@@ -560,7 +560,7 @@ module.exports = class storeRequestion {
       } else {
         const response = await this.deleteSummeryRow(id);
         if (response[0] == true) {
-          const response = await this.updateBalanceRaw(materialId, lastAtHand);
+          const response = await this.updateBalanceRaw(materialId, 0);
           return [true, "Deleted Succesfully"];
         } else {
           return [false, response];
@@ -604,7 +604,7 @@ module.exports = class storeRequestion {
       } else {
         const response = await this.deleteSummeryRow(id);
         if (response[0] == true) {
-          const response = await this.updateBalanceAccs(materialId, lastAtHand);
+          const response = await this.updateBalanceAccs(materialId, 0);
           return [true, "Deleted Succesfully"];
         } else {
           return [false, response];
