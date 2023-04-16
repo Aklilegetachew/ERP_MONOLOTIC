@@ -75,7 +75,17 @@ exports.showByType = async (req, res, next) => {
 
 exports.deleteStockSummery = async (req, res, next) => {
   console.log(req.body);
-  const result = await summeryClass.deleteSummery(req.body.id);
+  const result = await summeryClass.deleteSummery(
+    req.body.id,
+    req.body.materialId,
+    req.body.materialType
+  );
 
-  res.status(200).json(result);
+  if (result[0] == 0) {
+    res.status(200).json(result[1]);
+  } else {
+    res.status(500).json(result[1]);
+  }
 };
+
+

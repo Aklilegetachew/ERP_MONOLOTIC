@@ -1,3 +1,4 @@
+const { parse } = require("dotenv");
 const db = require("../../util/db");
 
 module.exports = class storeRequestion {
@@ -363,6 +364,17 @@ module.exports = class storeRequestion {
       });
   }
 
+  static async selectRawMaterials(id) {
+    return await db
+      .execute("SELECT * FROM raw_materials WHERE id = ?", [id])
+      .then((respo) => {
+        return respo[0];
+      })
+      .catch((e) => {
+        return e;
+      });
+  }
+
   static async selectAllBelowList(id, materialID) {
     return await db
       .execute("SELECT * FROM summery WHERE id > ? AND material_id = ?", [
@@ -391,29 +403,50 @@ module.exports = class storeRequestion {
       });
   }
 
-  static async updateRows(
-    id,
-    stockat_hand,
-    stock_recieved,
-    stock_issued,
-    stockat_end,
-    issues_kg,
-    stockatend_kg,
-    recived_kg
-  ) {
+  static async updateBalanceRaw(materialID, balance) {
+    return await db
+      .execute("UPDATE raw_materials SET raw_quantity = ? WHERE id = ?", [
+        balance,
+        materialID,
+      ])
+      .then((respo) => {
+        return respo[0];
+      })
+      .catch((e) => {
+        return e;
+      });
+  }
+
+  static async updateBalanceAccs(materialID, balance) {
+    return await db
+      .execute("UPDATE accs_materials SET accs_quantity = ? WHERE id = ?", [
+        balance,
+        materialID,
+      ])
+      .then((respo) => {
+        return respo[0];
+      })
+      .catch((e) => {
+        return e;
+      });
+  }
+
+  static async deleteSummeryRow(id) {
+    return await db
+      .execute("DELETE FROM summery WHERE id = ?", [id])
+      .then((respo) => {
+        return [true, respo];
+      })
+      .catch((err) => {
+        return [false, err];
+      });
+  }
+
+  static async updateRows(id, stockat_hand, stockat_end, stockatend_kg) {
     return await db
       .execute(
-        "UPDATE summery SET stockat_hand = ?, stock_recieved = ?, stock_issued = ?, stockat_end = ?, issues_kg = ?, stockatend_kg = ?, recived_kg = ? WHERE id = ?",
-        [
-          id,
-          stockat_hand,
-          stock_recieved,
-          stock_issued,
-          stockat_end,
-          issues_kg,
-          stockatend_kg,
-          recived_kg,
-        ]
+        "UPDATE summery SET stockat_hand = ?, stockat_end = ?, stockatend_kg = ? WHERE id = ?",
+        [stockat_hand, stockat_end, stockatend_kg, id]
       )
       .then((respo) => {
         return respo[0];
@@ -423,5 +456,136 @@ module.exports = class storeRequestion {
       });
   }
 
-  static deleteSummery(id, materialId) {}
+  static async deleteSummery(id, materialId, materialType) {
+    const summery = await this.selectDeletdRow(id);
+    const allSummeryBellow = await this.selectAllBelowList(id, materialId);
+
+    if (materialType == "FIN") {
+      const finishedGood = await this.selectFinishedGood(materialId);
+      var lastAtHand = parseFloat(summery[0].stockat_end);
+      var finshedMass = finishedGood[0].finished_mass;
+
+      console.log("summery", summery);
+      console.log("finishedGood", finishedGood);
+      console.log("all summery beloow ", allSummeryBellow);
+
+      if (allSummeryBellow.length !== 0) {
+        allSummeryBellow.map(async (eachData) => {
+          console.log("here", eachData);
+          var newStockAtHand = lastAtHand;
+          var newStockAtHandMass = 0.0;
+          var newStockAtEnd = 0.0;
+          if (eachData.stock_recieved == "") {
+            newStockAtEnd =
+              parseFloat(newStockAtHand) - parseFloat(eachData.stock_issued);
+            newStockAtHandMass =
+              parseFloat(newStockAtEnd) * parseFloat(finshedMass);
+          } else {
+            newStockAtEnd =
+              parseFloat(newStockAtHand) + parseFloat(eachData.stock_recieved);
+            newStockAtHandMass =
+              parseFloat(newStockAtEnd) * parseFloat(finshedMass);
+          }
+          const respon = await this.updateRows(
+            eachData.id,
+            newStockAtHand,
+            newStockAtEnd,
+            newStockAtHandMass
+          );
+          console.log("respon", respon);
+          lastAtHand = newStockAtEnd;
+
+          console.log("lastAtHand", lastAtHand);
+        });
+        const response = await this.updateBalance(materialId, lastAtHand);
+        return [true, "Deleted Succesfully"];
+      } else {
+        const response = await this.deleteSummeryRow(id);
+        if (response[0] == true) {
+          const response = await this.updateBalance(materialId, lastAtHand);
+          return [true, "Deleted Succesfully"];
+        } else {
+          return [false, response];
+        }
+      }
+
+      
+    } else if (materialType == "RAW") {
+      var lastAtHand = await summery[0].stockat_hand;
+
+      console.log("summery", summery);
+
+      console.log("all summery beloow ", allSummeryBellow);
+
+      if (allSummeryBellow.length !== 0) {
+        allSummeryBellow.map(async (eachData) => {
+          var newStockAtHand = lastAtHand;
+          var newStockAtHandMass = 0.0;
+          var newStockAtEnd = 0.0;
+          if (eachData.stock_recieved == "") {
+            newStockAtEnd =
+              parseFloat(newStockAtHand) - parseFloat(eachData.stock_issued);
+          } else {
+            newStockAtEnd =
+              parseFloat(newStockAtHand) + parseFloat(eachData.stock_recieved);
+          }
+          const respon = await this.updateRows(
+            id,
+            newStockAtHand,
+            newStockAtEnd,
+            ""
+          );
+          lastAtHand = newStockAtEnd;
+        });
+        const response = await this.updateBalanceRaw(materialId, lastAtHand);
+        return [true, "Deleted Succesfully"];
+      } else {
+        const response = await this.deleteSummeryRow(id);
+        if (response[0] == true) {
+          const response = await this.updateBalanceRaw(materialId, lastAtHand);
+          return [true, "Deleted Succesfully"];
+        } else {
+          return [false, response];
+        }
+      }
+    } else if (materialType == "ACCS") {
+      var lastAtHand = await summery[0].stockat_hand;
+
+      console.log("summery", summery);
+
+      console.log("all summery beloow ", allSummeryBellow);
+
+      if (allSummeryBellow.length !== 0) {
+        allSummeryBellow.map(async (eachData) => {
+          var newStockAtHand = lastAtHand;
+          var newStockAtHandMass = 0.0;
+          var newStockAtEnd = 0.0;
+          if (eachData.stock_recieved == "") {
+            newStockAtEnd =
+              parseFloat(newStockAtHand) - parseFloat(eachData.stock_issued);
+          } else {
+            newStockAtEnd =
+              parseFloat(newStockAtHand) + parseFloat(eachData.stock_recieved);
+          }
+          const respon = await this.updateRows(
+            id,
+            newStockAtHand,
+            newStockAtEnd,
+            ""
+          );
+          lastAtHand = newStockAtEnd;
+        });
+        const response = await this.updateBalanceAccs(materialId, lastAtHand);
+        return [true, "Deleted Succesfully"];
+      } else {
+        const response = await this.deleteSummeryRow(id);
+        if (response[0] == true) {
+          const response = await this.updateBalanceAccs(materialId, lastAtHand);
+          return [true, "Deleted Succesfully"];
+        } else {
+          return [false, response];
+        }
+      }
+    }
+  }
 };
