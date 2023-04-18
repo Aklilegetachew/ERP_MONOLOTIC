@@ -229,6 +229,16 @@ module.exports = class salesOrder {
       });
   }
 
+  static async showSalesOrderPROD(id, Date) {
+    try {
+      const resp = await db.execute(
+        "SELECT * FROM sales_order_prod WHERE status = 'Accepted' ORDER BY id DESC"
+      );
+      return resp[0];
+    } catch (err) {
+      return err;
+    }
+  }
   static showBankStatment(ID) {
     return db
       .execute("SELECT * FROM bank_status WHERE sales_id = ?", [ID])
@@ -238,6 +248,64 @@ module.exports = class salesOrder {
       .catch((err) => {
         return err;
       });
+  }
+
+  static async deleteBankStatment(ID) {
+    /////////////////////////////////sales Delete
+    try {
+      const resp = await db.execute(" DELETE FROM bank_status sales_id = ?", [
+        ID,
+      ]);
+      return resp[0];
+    } catch (err) {
+      return err;
+    }
+  }
+
+  static async deleteProductList(ID) {
+    try {
+      const resp = await db.execute(
+        " DELETE FROM cart_detaile WHERE material_id = ?",
+        [ID]
+      );
+      return resp[0];
+    } catch (err) {
+      return err;
+    }
+  }
+  static async DeleteSales(ID) {
+    try {
+      const resp = await db.execute("DELETE FROM sales_order WHERE id = ?", [
+        ID,
+      ]);
+      return resp[0];
+    } catch (err) {
+      return err;
+    }
+  }
+
+  static async DeleteSalesProd(ID, date) {
+    try {
+      const resp = await db.execute(
+        "DELETE FROM sales_order_prod WHERE salesId = ? AND DATE(sales_date) = DATE(?)",
+        [ID, date]
+      );
+      return resp[0];
+    } catch (err) {
+      return err;
+    }
+  }
+
+  static async DeleteSalesProfit(ID) {
+    try {
+      const resp = await db.execute(
+        "DELETE FROM dashboard_profit WHERE salesID = ? ",
+        [ID]
+      );
+      return resp[0];
+    } catch (err) {
+      return err;
+    }
   }
 
   static async showCartID(ID) {

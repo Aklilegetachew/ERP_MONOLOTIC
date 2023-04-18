@@ -63,16 +63,41 @@ module.exports.showSalesOrderPA = (req, res, next) => {
 };
 
 module.exports.salesBankStatments = (req, res, next) => {
-  console.log(req.body.ID)
+  console.log(req.body.ID);
   salesModle.showBankStatment(req.body.ID).then((respo) => {
     res.status(200).json(respo);
   });
 };
 
-
 module.exports.showCartByID = async (req, res, next) => {
   try {
     const respo = await salesModle.showCartID(req.body.ID);
+    console.log(respo);
+    res.status(200).json(respo);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+module.exports.DeleteSales = async (req, res, next) => {
+  try {
+    // step one delete bank statment
+    const response = await salesModle.deleteBankStatment(req.body.ID);
+    // step two  delete productlist
+    const response2 = await salesModle.deleteProductList(req.body.ID);
+    // step 3 we will be deleting sales order prod if Accepted
+    if (req.body.Status == "ACCEPTED") {
+      const listofSales = await salesModle.showSalesOrder(
+        req.body.Fs,
+        req.body.date
+      );
+    } else {
+      const respo = await salesModle.DeleteSales(req.body.ID);
+    }
+
+    // step 4 we will be deleting profit if exist
+
     console.log(respo);
     res.status(200).json(respo);
   } catch (error) {
