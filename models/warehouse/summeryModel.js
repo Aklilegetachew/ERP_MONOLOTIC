@@ -27,11 +27,8 @@ module.exports = class storeRequestion {
 
       return db
         .execute(
-          "SELECT * FROM summery WHERE material_id='" +
-            id +
-            "' AND material_type = '" +
-            materialType +
-            "'"
+          "SELECT * FROM summery WHERE material_id=? AND material_type=? ORDER BY STR_TO_DATE(summery_date, '%Y-%m-%d') ASC",
+          [id, materialType]
         )
         .then((result) => {
           var monthlyData = [];
@@ -516,7 +513,10 @@ module.exports = class storeRequestion {
       } else {
         const response = await this.deleteSummeryRow(id);
         if (response[0] == true) {
-          const response = await this.updateBalance(materialId, summery[0].stockat_hand);
+          const response = await this.updateBalance(
+            materialId,
+            summery[0].stockat_hand
+          );
           return [true, "Deleted Succesfully"];
         } else {
           return [false, response];
@@ -560,7 +560,10 @@ module.exports = class storeRequestion {
       } else {
         const response = await this.deleteSummeryRow(id);
         if (response[0] == true) {
-          const response = await this.updateBalanceRaw(materialId, summery[0].stockat_hand);
+          const response = await this.updateBalanceRaw(
+            materialId,
+            summery[0].stockat_hand
+          );
           return [true, "Deleted Succesfully"];
         } else {
           return [false, response];
@@ -604,7 +607,10 @@ module.exports = class storeRequestion {
       } else {
         const response = await this.deleteSummeryRow(id);
         if (response[0] == true) {
-          const response = await this.updateBalanceAccs(materialId, summery[0].stockat_hand);
+          const response = await this.updateBalanceAccs(
+            materialId,
+            summery[0].stockat_hand
+          );
           return [true, "Deleted Succesfully"];
         } else {
           return [false, response];
