@@ -250,10 +250,24 @@ module.exports = class salesOrder {
       });
   }
 
+  static showSalesOrderProd(Fs, Dates) {
+    return db
+      .execute(
+        "SELECT * FROM sales_order_prod WHERE sales_date = ? AND 	salesId  = ?",
+        [Dates, Fs]
+      )
+      .then((resp) => {
+        return resp[0];
+      })
+      .catch((err) => {
+        return err;
+      });
+  }
+
   static async deleteBankStatment(ID) {
     /////////////////////////////////sales Delete
     try {
-      const resp = await db.execute(" DELETE FROM bank_status sales_id = ?", [
+      const resp = await db.execute("DELETE FROM bank_status sales_id = ?", [
         ID,
       ]);
       return resp[0];
@@ -265,7 +279,7 @@ module.exports = class salesOrder {
   static async deleteProductList(ID) {
     try {
       const resp = await db.execute(
-        " DELETE FROM cart_detaile WHERE material_id = ?",
+        "DELETE FROM cart_detaile WHERE material_id = ?",
         [ID]
       );
       return resp[0];
@@ -289,6 +303,17 @@ module.exports = class salesOrder {
       const resp = await db.execute(
         "DELETE FROM sales_order_prod WHERE salesId = ? AND DATE(sales_date) = DATE(?)",
         [ID, date]
+      );
+      return resp[0];
+    } catch (err) {
+      return err;
+    }
+  }
+  static async DeleteSalespId(ID) {
+    try {
+      const resp = await db.execute(
+        "DELETE FROM sales_order_prod WHERE id = ?",
+        [ID]
       );
       return resp[0];
     } catch (err) {

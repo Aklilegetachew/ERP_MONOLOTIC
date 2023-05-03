@@ -82,7 +82,7 @@ router.post("/confirmStoreRelease", storeRelease.confirmRelease);
 router.post("/deleteSales", storeRelease.deleteSalesOrder);
 router.get("/salesSummery", sales_summery.showAllSummery);
 router.post("/showBankStatment", salesOrder.salesBankStatments);
-router.post("/salesDelete", salesOrder.DeleteSales);
+router.post("/salesDelete", salesOrder.DeleteSales); ///// delete Accepted not working
 
 router.post("/creatSalesOrder", salesOrder.creatSalesOrder);
 router.post("/creatBulkSalesOrder", salesOrder.creatBulkSalesOrder);

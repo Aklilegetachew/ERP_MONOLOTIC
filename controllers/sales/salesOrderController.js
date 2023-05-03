@@ -87,19 +87,32 @@ module.exports.DeleteSales = async (req, res, next) => {
     // step two  delete productlist
     const response2 = await salesModle.deleteProductList(req.body.ID);
     // step 3 we will be deleting sales order prod if Accepted
-    if (req.body.Status == "ACCEPTED") {
-      const listofSales = await salesModle.showSalesOrder(
+    if (req.body.Status == "Accepted") {
+      const listofSales = await salesModle.showSalesOrderProd(
         req.body.Fs,
         req.body.date
       );
+      try {
+        listofSales.map(async (item) => {
+          if (item.profitGenerated == 1) {
+            const respo = await salesModle.DeleteSalespId(item.id);
+            const respo2 = await salesModle.DeleteSalesProfit(item.id);
+          } else {
+            const respo = await salesModle.DeleteSalespId(item.id);
+          }
+        });
+
+        res.status(200).json({ message: "Deleted Sucessfully" });
+      } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Internal Server Error" });
+      }
     } else {
       const respo = await salesModle.DeleteSales(req.body.ID);
+      res.status(200).json({ message: "Deleted Sucessfully" });
     }
 
     // step 4 we will be deleting profit if exist
-
-    console.log(respo);
-    res.status(200).json(respo);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal Server Error" });
