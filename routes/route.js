@@ -26,6 +26,8 @@ router.get("/finishedMaterial", finishedMat.getFinished);
 router.post("/finishedMaterialbyCat", finishedMat.getFinishedByCat);
 router.post("/addnewFinMaterials", finishedMat.addFinished);
 router.post("/updateFinishedMaterials", finishedMat.UpdateFinished);
+router.put("/updateFinishedSummery", finishedMat.UpdateFinishedSummery);
+router.post("/deleteFinishedSummery", finishedMat.DeleteFinishedSummery);
 
 router.post("/addnewPurchased", received.newPurchased);
 router.post("/confirmPurchased", received.acceptPurchased);
@@ -47,7 +49,7 @@ router.post("/showExpenseByMonth", summery.showByIdExpense);
 router.post("/expensesMonthly", summery.showExpensesMontly);
 router.post("/showSummeryByYear", summery.showByIdYear);
 router.post("/showAllByType", summery.showByType);
-router.post("/deleteStockSummery", summery.deleteStockSummery)
+router.post("/deleteStockSummery", summery.deleteStockSummery);
 
 ///// for searching purpuse endpoints
 router.post("/searchName", searchController.searchName);
@@ -193,7 +195,7 @@ router.get("/getMonthExpense", dashboard.monthlyExpense);
 
 ///////////////////////////////////////////////////////////
 router.post("/diameterSelect", dashboard.selectDiameter);
-router.get("/finishedGoodSelect", dashboard.selectAllFin)
+router.get("/finishedGoodSelect", dashboard.selectAllFin);
 router.get("/colorSelect", dashboard.getLastFive);
 router.get("/nameSelect", dashboard.getLastFive);
 

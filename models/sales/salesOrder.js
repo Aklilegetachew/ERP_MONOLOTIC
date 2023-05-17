@@ -250,11 +250,26 @@ module.exports = class salesOrder {
       });
   }
 
-  static showSalesOrderProd(Fs, Dates) {
-    return db
+  // static convert(str) {
+  //   var date = new Date(str),
+  //     mnth = ("0" + (date.getMonth() + 1)).slice(-2),
+  //     day = ("0" + date.getDate()).slice(-2);
+  //   return [date.getFullYear(), mnth, day ].join("-");
+  // }
+
+  static async showSalesOrderProd(Fs, Dates) {
+    // console.log("fs", Fs);
+
+    // const dateObj = new Date(Date.parse(Dates));
+    // const timeZoneOffset = dateObj.getTimezoneOffset() * 60 * 1000; // error
+    // const localDate = new Date(dateObj.getTime() - timeZoneOffset);
+    // const isoDate = localDate.toISOString().substr(0, 10);
+    var newdate = Dates.split("-").reverse().join("-");
+    // console.log("Dates", newdate);
+    return await db
       .execute(
-        "SELECT * FROM sales_order_prod WHERE sales_date = ? AND 	salesId  = ?",
-        [Dates, Fs]
+        "SELECT * FROM sales_order_prod WHERE DATE(sales_date) = ? AND salesId  = ?",
+        [newdate, Fs]
       )
       .then((resp) => {
         return resp[0];

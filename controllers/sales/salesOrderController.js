@@ -92,6 +92,7 @@ module.exports.DeleteSales = async (req, res, next) => {
         req.body.Fs,
         req.body.date
       );
+      console.log(listofSales);
       try {
         listofSales.map(async (item) => {
           if (item.profitGenerated == 1) {
@@ -101,6 +102,7 @@ module.exports.DeleteSales = async (req, res, next) => {
             const respo = await salesModle.DeleteSalespId(item.id);
           }
         });
+        const respo = await salesModle.DeleteSales(req.body.ID);
 
         res.status(200).json({ message: "Deleted Sucessfully" });
       } catch (err) {

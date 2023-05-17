@@ -252,4 +252,53 @@ module.exports = class accessory {
         console.log(err);
       });
   }
+
+  static UpdateFinishedSummery(matId, rowData) {
+    const dateString = rowData.summery_date;
+    const [day, month, year] = dateString.split("-");
+
+    const mysqlDate = new Date(year, month - 1, day);
+    mysqlDate.setDate(mysqlDate.getDate() + 1); // Adjusting the day by adding 1
+
+    const formattedDate = mysqlDate.toISOString().split("T")[0];
+    console.log("date", formattedDate);
+    return db
+      .execute(
+        "UPDATE summery SET stockatend_kg = ?, issues_kg = ?, fs_number = ?, stockat_end = ?, department_issued = ?, stock_issued = ?, stock_recieved = ?, stockat_hand = ?, summery_date = ? WHERE id = ? AND material_id = ?",
+        [
+          rowData.stockatend_kg,
+          rowData.issues_kg,
+          rowData.fs_number,
+          rowData.stockat_end,
+          rowData.department_issued,
+          rowData.stock_issued,
+          rowData.stock_recieved,
+          rowData.stockat_hand,
+          formattedDate,
+          rowData.id,
+          matId,
+        ]
+      )
+      .then((result) => {
+        return result;
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
+  static DeleteFinishedSummery(matId, rowData) {
+    return db
+      .execute("DELETE FROM summery WHERE id = ? AND material_id = ?", [
+        rowData.id,
+        matId,
+      ])
+      .then((res) => {
+        return "Delete Confirmed";
+      })
+      .catch((err) => {
+        console.log(err);
+        return err;
+      });
+  }
 };
