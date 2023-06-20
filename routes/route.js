@@ -209,7 +209,7 @@ router.get("/generateExcel", dashboard.getExcelFile);
 // Notification
 
 router.post("/sendNotification", dashboard.NotifyingTG);
-
+router.post('/email',require('../controllers/email').sendEmail)
 router.get("/", Home.home);
 
 module.exports = router;
