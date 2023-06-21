@@ -9,7 +9,7 @@ exports.getFinished = (req, res, next) => {
 
 exports.getFinishedByCat = (req, res, next) => {
   finishedGood.getallFinishedCat(req.body.Cat, req.body.Spec).then((result) => {
-    console.log(result);
+    console.log(result,"ressssssssssssssssssss");
     res.status(200).json(result);
   });
 };
@@ -49,6 +49,20 @@ exports.DeleteFinishedSummery = (req, res, next) => {
   
   finishedGood
     .DeleteFinishedSummery(req.body.matId, req.body.summery)
+    .then((result) => {
+      res.status(200).json({ message: result });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(400).json({ message: err });
+    });
+};
+
+
+exports.updateFinishgoods = (req, res, next) => {
+
+  finishedGood
+    .updateFinishgoodsModule(req.body.id, req.body.data)
     .then((result) => {
       res.status(200).json({ message: result });
     })

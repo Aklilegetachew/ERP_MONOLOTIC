@@ -28,6 +28,7 @@ router.post("/addnewFinMaterials", finishedMat.addFinished);
 router.post("/updateFinishedMaterials", finishedMat.UpdateFinished);
 router.put("/updateFinishedSummery", finishedMat.UpdateFinishedSummery);
 router.post("/deleteFinishedSummery", finishedMat.DeleteFinishedSummery);
+router.put("/updateFinishgoods", finishedMat.updateFinishgoods);
 
 router.post("/addnewPurchased", received.newPurchased);
 router.post("/confirmPurchased", received.acceptPurchased);
