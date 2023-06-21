@@ -1,4 +1,5 @@
 const db = require("../../util/db");
+const {static} = require("express");
 
 module.exports = class accessory {
   static getallFinished() {
@@ -18,25 +19,30 @@ module.exports = class accessory {
     if (catagory == "Conduit") {
       return db
         .execute(
-          "SELECT * FROM finished_goods WHERE finished_name = '" +
+          "SELECT * FROM finished_goods AS fin, summery AS sumry WHERE fin.id = sumry.material_id AND finished_name = '" +
             catagory +
             "'"
         )
         .then((result) => {
+            console.log(result[0],"result")
           return result[0];
         })
         .catch((err) => {
           return console.log(err);
         });
     } else {
+
       return db
-        .execute(
-          "SELECT * FROM finished_goods WHERE finished_name = '" +
-            catagory +
-            "' AND finished_description = '" +
-            Spec +
-            "'"
-        )
+          .execute(
+              "SELECT * FROM finished_goods WHERE finished_name = '" +
+              catagory +
+              "' AND finished_description = '" +
+              Spec +
+              "'"
+          )
+        // .execute(
+        //   "SELECT * FROM finished_goods AS fin, summery AS sumry WHERE sumry.id = ( SELECT MAX(id) FROM summery WHERE fin.id = sumry.material_id) AND fin.id = sumry.material_id AND finished_name = ? AND finished_description = ?",[catagory,Spec ]
+        // )
         .then((result) => {
           return result[0];
         })
@@ -301,4 +307,28 @@ module.exports = class accessory {
         return err;
       });
   }
+
+    static updateFinishgoodsModule(id, data){
+      console.log(data,"newdara")
+        return db
+            .execute(
+                "UPDATE finished_goods SET finished_materialcode = ?, finished_diameter = ?, color= ?, finished_quantity = ?, finished_mass = ? WHERE id = ? ",
+                [
+                    data.finished_materialcode,
+                    data.finished_diameter,
+                    data.color,
+                    data.finished_quantity,
+                    data.finished_mass,
+                    id,
+                ])
+            .then((result) => {
+                return result;
+            })
+            .catch((err) => {
+                console.log(err);
+                return err;
+            });
+
+    }
 };
+
